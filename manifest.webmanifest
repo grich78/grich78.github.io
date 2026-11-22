@@ -1,0 +1,27 @@
+{
+  "id": "./",
+  "name": "Գրիչ",
+  "short_name": "Գրիչ",
+  "description": "Ռեֆերատ, կուրսային, դիպլոմային, թեզ, պրեզենտացիա և ձևավորում Երևանում։ Գինը՝ անմիջապես, պատվերը՝ 3 քայլով։",
+  "lang": "hy",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "background_color": "#111a33",
+  "theme_color": "#111a33",
+  "categories": ["education", "productivity"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "shortcuts": [
+    { "name": "Հաշվել գինը", "short_name": "Գին", "url": "./#price", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Նոր պատվեր", "short_name": "Պատվեր", "url": "./#order", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Իմ պատվերները", "short_name": "Իմ պատվերները", "url": "./#my", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

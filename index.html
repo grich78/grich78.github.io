@@ -1,0 +1,1254 @@
+<!doctype html>
+<html lang="hy">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Գրիչ</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Գրիչ — ռեֆերատ, կուրսային, դիպլոմային, թեզ, պրեզենտացիա և ձևավորում Երևանում։ Գինը՝ անմիջապես, պատվերը՝ 3 քայլով։">
+<meta name="theme-color" content="#111a33" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#070b16" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Գրիչ">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Armenian:wdth,wght@75..100,400..800&family=Noto+Serif+Armenian:wght@600;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: one codebase, two shapes — on phones an app shell (top bar + 4-tab bottom bar, one view at a time); from 900px a centered website with the tabs as a top nav. Same notebook-grid, navy ink, blue brand and yellow highlighter as the Գրիչ site. */
+:root{
+  --bg:#f4f6fb; --surface:#ffffff; --ink:#111a33; --muted:#59627c; --line:#dde3ee; --grid:#e8edf6;
+  --brand:#2f55f0; --on-brand:#ffffff; --brand-soft:#e9eeff; --mark:#ffe14d; --on-mark:#111a33; --ok:#12885a; --warn:#b4540b;
+  --shadow:rgba(17,26,51,.35);
+  --deep:#111a33; --deep-2:#1b2650; --on-deep:#ffffff; --on-deep-mut:#aeb8d8; --deep-line:rgba(255,255,255,.13);
+  --sans:"Noto Sans Armenian","Inter",system-ui,sans-serif;
+  --serif:"Noto Serif Armenian",Georgia,serif;
+  --mono:"JetBrains Mono","Noto Sans Armenian",ui-monospace,Consolas,monospace;
+  --r:14px; --r-sm:10px; --tabbar:68px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0c1120; --surface:#141b2e; --ink:#e7ecf7; --muted:#9ba6c0; --line:#263150; --grid:#182039;
+  --brand:#7d98ff; --on-brand:#0c1120; --brand-soft:#1b2648; --mark:#e9c94c; --on-mark:#111a33; --ok:#55c993; --warn:#f0a15c; --shadow:rgba(0,0,0,.6); --deep:#070b16; --deep-2:#131c38; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0c1120; --surface:#141b2e; --ink:#e7ecf7; --muted:#9ba6c0; --line:#263150; --grid:#182039;
+  --brand:#7d98ff; --on-brand:#0c1120; --brand-soft:#1b2648; --mark:#e9c94c; --on-mark:#111a33; --ok:#55c993; --warn:#f0a15c; --shadow:rgba(0,0,0,.6); --deep:#070b16; --deep-2:#131c38; color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.6;padding-bottom:calc(var(--tabbar) + env(safe-area-inset-bottom,0px))}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{line-height:1.15;text-wrap:balance;margin:0;font-weight:800;font-stretch:87.5%}
+h1{font-family:var(--serif);font-stretch:normal;font-size:clamp(1.65rem,4.2vw,2.6rem);letter-spacing:-.01em}
+h2{font-family:var(--serif);font-stretch:normal;font-size:clamp(1.3rem,3vw,1.8rem)}
+h3{font-size:1.08rem}
+p{margin:0}
+a{color:var(--brand)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--brand);outline-offset:2px;border-radius:6px}
+.eyebrow{font-size:.74rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.mark{background:linear-gradient(transparent 58%,var(--mark) 58%);padding:0 .08em}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.sec-head{display:grid;gap:8px;margin-bottom:20px;max-width:700px}
+.sec-head > p:not(.eyebrow){color:var(--muted)}
+.block{margin-top:40px}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;border-radius:999px;padding:12px 22px;font-weight:700;font-size:1rem;text-decoration:none;cursor:pointer;border:1.5px solid transparent;transition:transform .15s,background .15s;white-space:nowrap}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--brand);color:var(--on-brand)}
+.btn-dark{background:var(--ink);color:var(--bg)}
+.btn-ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn-ghost:hover{border-color:var(--ink)}
+.btn-sm{min-height:38px;padding:7px 15px;font-size:.88rem}
+.btn.danger{border-color:var(--warn);color:var(--warn)}
+
+/* app bar */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--deep)}
+.appbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--deep) 92%,transparent);-webkit-backdrop-filter:blur(14px) saturate(1.4);backdrop-filter:blur(14px) saturate(1.4);border-bottom:1px solid var(--deep-line);color:var(--on-deep)}
+.topbar{display:flex;align-items:center;gap:14px;min-height:58px}
+.logo{display:flex;align-items:center;gap:9px;font-weight:800;font-size:1.3rem;color:var(--on-deep);text-decoration:none;font-family:var(--serif);letter-spacing:.01em}
+.logo svg{color:var(--on-deep)}
+.tabs-top{display:none}
+.bar-end{margin-left:auto;display:flex;align-items:center;gap:10px}
+#install{display:none}
+.lang{display:flex;border:1px solid var(--deep-line);border-radius:999px;padding:3px;background:rgba(255,255,255,.04)}
+.lang button{border:0;background:transparent;color:var(--on-deep-mut);font-weight:700;font-size:.74rem;letter-spacing:.03em;padding:6px 9px;border-radius:999px;cursor:pointer;transition:background .2s,color .2s}
+.lang button[aria-pressed="true"]{background:var(--mark);color:var(--on-mark)}
+
+/* bottom tab bar */
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:25;display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:color-mix(in srgb,var(--surface) 84%,transparent);-webkit-backdrop-filter:blur(18px) saturate(1.6);backdrop-filter:blur(18px) saturate(1.6);border-top:1px solid var(--line);box-shadow:0 -12px 30px -24px var(--shadow);
+  padding:6px max(6px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-left,0px))}
+.tabbar a{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;padding:2px 2px 4px;min-height:54px;color:var(--muted);text-decoration:none;font-size:.68rem;font-weight:700;line-height:1.15;text-align:center;border-radius:12px}
+.tabbar svg{width:54px;height:30px;padding:4px 15px;border-radius:999px;flex:none;transition:background .15s}
+.tabbar a[aria-current="page"]{color:var(--ink)}
+.tabbar a[aria-current="page"] svg{background:var(--brand-soft);color:var(--brand)}
+.count{position:absolute;top:0;left:calc(50% + 6px);min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--mark);color:var(--on-mark);font:600 .66rem/18px var(--mono);text-align:center}
+
+@media (min-width:900px){
+  body{padding-bottom:0}
+  .tabbar{display:none}
+  .tabs-top{display:flex;gap:4px;margin-left:18px}
+  .tabs-top a{position:relative;display:inline-flex;align-items:center;gap:8px;padding:8px 15px;border-radius:999px;color:var(--on-deep-mut);text-decoration:none;font-weight:700;font-size:.92rem;transition:background .2s,color .2s}
+  .tabs-top a:hover{color:var(--on-deep)}
+  .tabs-top a[aria-current="page"]{background:rgba(255,255,255,.12);color:var(--on-deep)}
+  .tabs-top .count{position:static}
+  #install:not([hidden]){display:inline-flex;color:var(--on-deep);border-color:var(--deep-line)}
+}
+
+/* views */
+.view{padding-block:22px 36px;animation:in .22s ease-out}
+@keyframes in{from{opacity:.4;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (min-width:900px){.view{padding-block:44px 72px}}
+
+/* price view */
+.pv{display:grid;gap:18px;grid-template-areas:"intro" "quote" "ticks"}
+.pv-intro{grid-area:intro;display:grid;gap:10px}
+.pv-intro .lead{color:var(--muted);max-width:540px}
+.pv-ticks{grid-area:ticks}
+.quote{grid-area:quote}
+@media (max-width:599px){.pv-intro .lead{display:none}}
+@media (min-width:900px){
+  .pv{grid-template-columns:1.05fr .95fr;grid-template-areas:"intro quote" "ticks quote";column-gap:48px;row-gap:22px;align-items:start}
+  .pv-intro{gap:16px;align-self:end}
+  .pv-intro .lead{font-size:1.1rem}
+}
+.vprice{padding-top:0}
+.hero-dark{position:relative;background-color:var(--deep);color:var(--on-deep);border-bottom:1px solid var(--deep-line);padding-block:24px 30px;
+  background-image:radial-gradient(110% 60% at 100% 0%,color-mix(in srgb,var(--brand) 42%,transparent),transparent 62%),radial-gradient(70% 40% at 0% 100%,color-mix(in srgb,var(--mark) 10%,transparent),transparent 70%),linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px);
+  background-size:auto,auto,24px 24px,24px 24px}
+.hero-dark .eyebrow{color:var(--on-deep-mut)}
+.hero-dark .lead{color:var(--on-deep-mut)}
+.hero-dark h1{font-family:var(--serif);font-weight:800;font-size:clamp(1.75rem,4.6vw,3.1rem);line-height:1.14;letter-spacing:-.01em}
+.hero-dark .mark{background:linear-gradient(transparent 82%,color-mix(in srgb,var(--mark) 55%,transparent) 82%,color-mix(in srgb,var(--mark) 55%,transparent) 94%,transparent 94%);color:var(--mark);padding:0}
+@media (min-width:900px){.hero-dark{padding-block:56px 64px}}
+.ticks{list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.ticks li{display:flex;gap:10px;align-items:flex-start;font-weight:600}
+.ticks svg{flex:none;margin-top:3px;color:var(--ok)}
+.hero-dark .ticks li{color:var(--on-deep)}
+.hero-dark .ticks svg{color:var(--mark)}
+
+/* install banner */
+.ibanner{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.07);border:1px solid var(--deep-line);color:var(--on-deep);border-radius:var(--r);padding:10px 10px 10px 12px;margin-bottom:18px}
+.ibanner img{width:40px;height:40px;border-radius:10px;flex:none}
+.ibanner div{flex:1;min-width:0;display:grid;gap:2px}
+.ibanner b{font-size:.95rem;line-height:1.25}
+.ibanner small{font-size:.8rem;opacity:.8;line-height:1.35}
+.ibanner .btn{background:var(--mark);color:var(--on-mark);min-height:36px;padding:6px 14px;font-size:.85rem}
+.ibanner .x{border:0;background:transparent;color:inherit;opacity:.7;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1.2rem;flex:none}
+@media (min-width:900px){.ibanner{display:none!important}}
+
+/* quote card */
+.quote{background:var(--surface);color:var(--ink);border:1px solid color-mix(in srgb,var(--line) 70%,transparent);border-radius:24px;box-shadow:0 1px 0 rgba(255,255,255,.6) inset,0 40px 80px -40px rgba(0,0,0,.65),0 10px 24px -16px rgba(0,0,0,.4);padding:18px;display:grid;gap:16px}
+@media (min-width:600px){.quote{padding:26px}}
+.quote-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.quote-top strong{font-size:1.15rem;font-family:var(--serif);font-weight:800}
+.badge{font-size:.74rem;font-weight:700;background:var(--brand-soft);color:var(--brand);padding:4px 10px;border-radius:999px;white-space:nowrap}
+.types{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.types label,.seg label{position:relative}
+.types input,.seg input,.stseg input{position:absolute;opacity:0;pointer-events:none}
+.types > label > span{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-align:center;min-height:60px;height:100%;padding:8px 6px;border:1.5px solid var(--line);border-radius:12px;font-weight:700;font-size:.85rem;line-height:1.2;cursor:pointer;background:var(--bg);transition:border-color .15s,background .15s,transform .15s}
+.types em{font:500 .68rem var(--mono);font-style:normal;color:var(--muted);font-variant-numeric:tabular-nums}
+.types input:checked + span{border-color:var(--brand);background:var(--brand-soft);box-shadow:0 6px 16px -10px var(--brand)}
+.types input:checked + span em{color:var(--brand)}
+.types label:active span{transform:scale(.97)}
+.types input:focus-visible + span,.seg input:focus-visible + span,.stseg input:focus-visible + span{outline:3px solid var(--brand);outline-offset:2px}
+.qrow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.qrow > div{min-width:0}
+.lbl{display:block;font-weight:700;font-size:.85rem;margin-bottom:6px}
+.stepper{display:flex;align-items:center;border:1.5px solid var(--line);border-radius:var(--r-sm);background:var(--bg);overflow:hidden}
+.stepper button{width:44px;height:46px;border:0;background:transparent;font-size:1.3rem;font-weight:700;cursor:pointer;color:var(--ink);flex:none}
+.stepper button:hover{background:var(--brand-soft)}
+.stepper input{flex:1;min-width:0;border:0;background:transparent;text-align:center;font:600 1.05rem var(--mono);padding:0;height:46px;min-height:0}
+.stepper input::-webkit-inner-spin-button{appearance:none}
+input,select,textarea{font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:var(--r-sm);padding:11px 12px;width:100%;min-height:48px}
+input:focus,select:focus,textarea:focus{border-color:var(--brand);outline:none}
+textarea{min-height:96px;resize:vertical}
+.hint{font-size:.8rem;color:var(--muted);margin-top:5px}
+.hint.warn{color:var(--warn);font-weight:600}
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg span{display:inline-flex;align-items:center;min-height:42px;padding:7px 15px;border:1.5px solid var(--line);border-radius:999px;font-weight:600;font-size:.92rem;cursor:pointer;background:var(--bg)}
+.seg input:checked + span{border-color:var(--brand);background:var(--brand-soft)}
+.price-box{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap;background-color:var(--deep);color:var(--on-deep);border-radius:18px;padding:18px;
+  background-image:radial-gradient(90% 120% at 100% 0%,color-mix(in srgb,var(--brand) 38%,transparent),transparent 60%)}
+.price-box > div{display:grid;gap:5px}
+.price-box .sum{font:600 clamp(2rem,8vw,2.5rem)/1 var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.price-box small{color:var(--on-deep-mut);font-size:.78rem}
+.price-box .btn-primary{background:var(--mark);color:var(--on-mark);box-shadow:0 10px 24px -12px var(--mark)}
+.brk summary{cursor:pointer;font-weight:700;font-size:.88rem;color:var(--brand);list-style:none}
+.brk summary::-webkit-details-marker{display:none}
+.brk summary::after{content:" +";font-family:var(--mono)}
+.brk[open] summary::after{content:" −"}
+.rows{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:6px;font-size:.9rem}
+.rows li{display:flex;justify-content:space-between;gap:12px}
+.rows li span:last-child{font-family:var(--mono);font-variant-numeric:tabular-nums}
+@media (max-width:380px){.types{grid-template-columns:repeat(2,1fr)}.qrow{grid-template-columns:1fr}}
+
+/* price table */
+.ptable{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.prow{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr auto;gap:16px;align-items:center;padding:14px 20px;border-top:1px solid var(--line)}
+.prow:first-child{border-top:0}
+.prow.head{background:var(--bg);font-size:.74rem;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:700;padding-block:11px}
+.prow .t{font-weight:700}
+.prow .t small{display:block;font-weight:400;color:var(--muted);font-size:.84rem}
+.prow .from{font:600 1.02rem var(--mono)}
+.prow .k{display:none;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+@media (max-width:760px){
+  .prow.head{display:none}
+  .prow{grid-template-columns:1fr 1fr 1fr;gap:4px 12px;padding:14px 16px}
+  .prow .t{grid-column:1/-1;margin-bottom:4px}
+  .prow .k{display:block}
+  .prow .act{grid-column:1/-1;margin-top:6px}
+  .prow .act .btn{width:100%}
+}
+.pnote{font-size:.86rem;color:var(--muted);margin-top:12px}
+
+/* wizard */
+.order-wrap{display:grid;grid-template-columns:1.5fr .9fr;gap:24px;align-items:start}
+.order-wrap > *{min-width:0}
+.wiz{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:26px}
+.progress{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 24px;list-style:none;padding:0}
+.progress button{width:100%;border:0;background:transparent;text-align:left;padding:0;cursor:pointer;display:grid;gap:8px}
+.progress .bar{height:5px;border-radius:3px;background:var(--line)}
+.progress .on .bar{background:var(--brand)}
+.progress .cap{font-size:.8rem;font-weight:700;color:var(--muted);line-height:1.25}
+.progress .on .cap{color:var(--ink)}
+fieldset{border:0;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:16px 18px}
+fieldset > div{min-width:0}
+fieldset .full{grid-column:1/-1}
+legend{font-weight:800;font-size:1.3rem;margin-bottom:16px;font-stretch:87.5%;padding:0}
+.checks{display:grid;gap:10px}
+.check{display:flex;gap:12px;align-items:flex-start;border:1.5px solid var(--line);border-radius:var(--r-sm);padding:12px 14px;cursor:pointer;background:var(--bg)}
+.check input{width:20px;height:20px;min-height:0;accent-color:var(--brand);margin-top:2px;flex:none;padding:0}
+.check b{display:block;font-size:.95rem}
+.check small{color:var(--muted)}
+.wiz-nav{display:flex;justify-content:space-between;gap:12px;margin-top:24px;flex-wrap:wrap}
+.wiz-nav #w-next{margin-left:auto}
+.err{color:var(--warn);font-weight:600;font-size:.9rem;margin-top:12px}
+.summary{position:sticky;top:calc(env(safe-area-inset-top,0px) + 82px);background-color:var(--deep);color:var(--on-deep);border-radius:22px;padding:24px;display:grid;gap:12px;box-shadow:0 30px 60px -36px rgba(0,0,0,.6);
+  background-image:radial-gradient(100% 80% at 100% 0%,color-mix(in srgb,var(--brand) 40%,transparent),transparent 60%)}
+.summary .eyebrow{color:var(--on-deep-mut)}
+.summary .sum{font:600 2.3rem/1 var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.summary .rows{margin:0}
+.summary .split{border-top:1px solid var(--deep-line);padding-top:12px;font-size:.88rem;display:grid;gap:4px}
+.summary .split div{display:flex;justify-content:space-between;gap:12px}
+.summary small{color:var(--on-deep-mut);font-size:.8rem}
+.result{display:grid;gap:14px}
+.result pre{margin:0;white-space:pre-wrap;word-break:break-word;font:400 .92rem/1.55 var(--sans);background:var(--bg);border:1px solid var(--line);border-radius:var(--r-sm);padding:16px;max-height:340px;overflow:auto}
+.result .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.ok{color:var(--ok);font-weight:700}
+.saved{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:.92rem}
+@media (max-width:899px){
+  .order-wrap{grid-template-columns:1fr;gap:14px}
+  .summary{position:static;order:-1;padding:16px 18px;gap:8px;border-radius:16px;grid-template-columns:1fr auto;align-items:center}
+  .summary .eyebrow,.summary .rows,.summary small{display:none}
+  .summary #sum-type{font-size:.95rem!important}
+  .summary .sum{font-size:1.5rem;grid-column:2;grid-row:1/3;align-self:center}
+  .summary .split{grid-column:1;padding-top:0;border:0;font-size:.8rem;gap:0;opacity:.85}
+}
+@media (max-width:560px){fieldset{grid-template-columns:1fr}.wiz{padding:18px;border-radius:16px}.progress .cap{font-size:.74rem}}
+
+/* my orders */
+.olist{display:grid;gap:12px}
+@media (min-width:900px){.olist{grid-template-columns:1fr 1fr;align-items:start}}
+.ocard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:grid;gap:12px}
+.ocard.is-done .ohead strong,.ocard.is-done .otopic{color:var(--muted)}
+.ohead{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.ohead strong{font-size:1.02rem;line-height:1.3}
+.otopic{font-size:.92rem;overflow-wrap:anywhere}
+.ometa{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.82rem;color:var(--muted)}
+.ometa b{color:var(--ink);font-family:var(--mono);font-weight:600}
+.due{font-size:.76rem;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--brand-soft);color:var(--brand);white-space:nowrap;flex:none}
+.due.soon{background:var(--mark);color:var(--on-mark)}
+.due.over{background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn)}
+.due.fin{background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok)}
+.tl{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.tl i{display:block;height:100%;background:var(--brand);border-radius:3px}
+.tl.over i{background:var(--warn)} .tl.fin i{background:var(--ok)}
+.stseg{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:3px}
+.stseg label{position:relative;min-width:0}
+.stseg span{display:flex;align-items:center;justify-content:center;text-align:center;min-height:36px;padding:4px 2px;font-size:.72rem;font-weight:700;line-height:1.15;border-radius:9px;color:var(--muted);cursor:pointer}
+.stseg input:checked + span{background:var(--surface);color:var(--ink);box-shadow:0 1px 4px -1px var(--shadow)}
+.stseg input[value="done"]:checked + span{color:var(--ok)}
+@media (max-width:430px){.stseg{grid-template-columns:1fr 1fr}.stseg span{font-size:.76rem}}
+.oact{display:flex;flex-wrap:wrap;gap:8px}
+.oact .del{margin-left:auto}
+.empty{background:var(--surface);border:1px dashed var(--line);border-radius:var(--r);padding:32px 20px;display:grid;gap:10px;justify-items:center;text-align:center}
+.empty p{color:var(--muted);max-width:420px}
+.empty svg{color:var(--brand)}
+.privacy{font-size:.84rem;color:var(--muted);display:flex;gap:8px;align-items:flex-start;margin-top:16px}
+.privacy svg{flex:none;margin-top:2px}
+
+/* faq view */
+.faq{display:grid;gap:10px;max-width:860px}
+.faq details{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:0 18px}
+.faq summary{cursor:pointer;font-weight:700;list-style:none;display:flex;justify-content:space-between;gap:12px;padding-block:16px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";font:600 1.2rem var(--mono);color:var(--brand)}
+.faq details[open] summary::after{content:"−"}
+.faq details p{padding-bottom:16px;color:var(--muted)}
+.ccard{background-color:var(--deep);color:var(--on-deep);border-radius:22px;padding:22px;display:grid;gap:14px;max-width:860px;
+  background-image:radial-gradient(90% 90% at 100% 0%,color-mix(in srgb,var(--brand) 38%,transparent),transparent 60%)}
+.ccard h2{font-family:var(--serif)}
+.ccard .contacts{display:grid;gap:6px;font-size:.95rem}
+.ccard .contacts b{user-select:all}
+.ccard .contacts a{color:var(--mark)}
+.msgr{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip-m{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--deep-line);border-radius:999px;padding:5px 12px;font-size:.86rem;font-weight:600}
+.chip-m i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.ccard .btn-primary{background:var(--mark);color:var(--on-mark);justify-self:start}
+.guar{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.g{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px;display:grid;gap:8px;align-content:start}
+.g .ic{width:40px;height:40px;border-radius:12px;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center}
+.g p{color:var(--muted);font-size:.94rem}
+@media (max-width:900px){.guar{grid-template-columns:1fr 1fr}}
+@media (max-width:560px){.guar{grid-template-columns:1fr}.g{grid-template-columns:auto 1fr;column-gap:14px}.g .ic{grid-row:1/3}}
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,1fr);gap:14px;counter-reset:s}
+.steps li{counter-increment:s;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;display:grid;gap:6px;align-content:start;position:relative}
+.steps li::before{content:counter(s);width:30px;height:30px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;font:600 .88rem var(--mono)}
+.steps p{color:var(--muted);font-size:.9rem}
+.steps .pay{justify-self:start;font-size:.74rem;font-weight:700;background:var(--mark);color:var(--on-mark);padding:2px 8px;border-radius:6px}
+@media (max-width:980px){.steps{grid-template-columns:1fr 1fr}}
+@media (max-width:560px){.steps{grid-template-columns:1fr;gap:8px}.steps li{grid-template-columns:30px 1fr;column-gap:12px;padding:14px}.steps li::before{grid-row:1/4}}
+.samples{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.samples figure{margin:0;display:grid;gap:10px;min-width:0;align-content:start}
+.samples figcaption{font-weight:700;font-size:.92rem}
+.samples figcaption small{display:block;font-weight:400;color:var(--muted);font-size:.84rem}
+@media (max-width:899px){.samples{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:8px;margin-inline:calc(-1 * max(16px,env(safe-area-inset-left,0px))) calc(-1 * max(16px,env(safe-area-inset-right,0px)));padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px))}.samples figure{flex:0 0 min(56vw,230px);scroll-snap-align:start}}
+.sheet{aspect-ratio:210/297;max-width:100%;background:var(--surface);border:1px solid var(--line);border-radius:4px;box-shadow:0 16px 30px -22px var(--shadow);padding:9% 7% 9% 14%;display:flex;flex-direction:column;font-size:clamp(.45rem,.75vw,.6rem);line-height:1.45;color:var(--ink);overflow:hidden;font-family:var(--serif)}
+.sheet.wide{aspect-ratio:16/9;padding:8%;font-family:var(--sans)}
+.sheet .c{text-align:center}
+.sheet .mut{color:var(--muted)}
+.sheet .big{font-weight:800;font-size:1.6em;letter-spacing:.03em;margin-top:auto}
+.sheet .toc{display:grid;gap:.35em;margin-top:1.2em}
+.sheet .toc div{display:flex;gap:.4em}
+.sheet .toc div::after{content:"";order:1;flex:1;border-bottom:1px dotted var(--muted);transform:translateY(-.35em)}
+.sheet .toc span:last-child{order:2;font-family:var(--mono)}
+.sheet .toc .sub{padding-left:1.2em}
+.sheet .ln{height:.42em;background:var(--grid);border-radius:2px;margin-top:.55em}
+.sheet .fn{margin-top:auto;border-top:1px solid var(--muted);width:40%;padding-top:.3em}
+.sheet .pg{text-align:center;font-family:var(--mono);margin-top:.6em}
+.sheet .bars{display:flex;align-items:flex-end;gap:7%;flex:1;margin-top:6%}
+.sheet .bars i{flex:1;background:var(--brand);border-radius:2px 2px 0 0}
+.sheet .bars i:nth-child(3){background:var(--mark)}
+@media (max-width:899px){.sheet{font-size:clamp(.42rem,2.3vw,.6rem)}}
+.subjects{display:flex;flex-wrap:wrap;gap:8px}
+.subjects span{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-weight:600;font-size:.9rem}
+.icard{display:flex;gap:16px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;max-width:860px}
+.icard img{width:56px;height:56px;border-radius:14px;flex:none}
+.icard > div{display:grid;gap:6px;min-width:0}
+.icard p{color:var(--muted);font-size:.92rem}
+.icard .btn{justify-self:start;margin-top:4px}
+.foot{color:var(--muted);font-size:.88rem;border-top:1px solid var(--line);padding-top:20px;margin-top:40px;display:grid;gap:4px}
+.foot strong{color:var(--ink)}
+
+/* toast */
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--tabbar) + 14px + env(safe-area-inset-bottom,0px));z-index:40;background:var(--deep);color:var(--on-deep);border:1px solid var(--deep-line);border-radius:999px;padding:10px 12px 10px 18px;font-weight:600;font-size:.9rem;display:flex;gap:12px;align-items:center;box-shadow:0 14px 30px -14px var(--shadow);max-width:calc(100vw - 32px)}
+.toast button{border:0;background:var(--mark);color:var(--on-mark);font-weight:700;border-radius:999px;padding:6px 12px;cursor:pointer}
+@media (min-width:900px){.toast{bottom:24px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<header class="appbar">
+  <div class="wrap topbar">
+    <a class="logo" href="#price" aria-label="Գրիչ">
+      <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="2" width="22" height="28" rx="3" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M8 9h12M8 14h12M8 19h7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M22 25l6-12 2.2 1.1-6 12-3.2.9z" fill="var(--brand)"/></svg>
+      Գրիչ
+    </a>
+    <nav class="tabs-top" aria-label="Բաժիններ">
+      <a href="#price" data-tab="price" data-i18n="tab_price">Գին</a>
+      <a href="#order" data-tab="order" data-i18n="tab_order">Պատվեր</a>
+      <a href="#my" data-tab="my"><span data-i18n="tab_my">Իմ պատվերները</span><span class="count" hidden></span></a>
+      <a href="#faq" data-tab="faq" data-i18n="tab_faq">Հարցեր</a>
+    </nav>
+    <div class="bar-end">
+      <button type="button" class="btn btn-ghost btn-sm" id="install" hidden>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>
+        <span data-i18n="inst_b">Տեղադրել</span>
+      </button>
+      <div class="lang" role="group" aria-label="Լեզու / Язык / Language">
+        <button type="button" id="lang-hy" aria-pressed="true">ՀԱՅ</button>
+        <button type="button" id="lang-ru" aria-pressed="false">РУС</button>
+        <button type="button" id="lang-en" aria-pressed="false">ENG</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+<!-- ===== PRICE ===== -->
+<section class="view vprice" id="v-price" aria-labelledby="h-price">
+  <div class="hero-dark"><div class="wrap">
+    <div class="ibanner" id="install-banner" hidden>
+      <img src="icons/icon-192.png" alt="" width="40" height="40">
+      <div><b data-i18n="inst_t">Տեղադրիր հավելվածը</b><small id="ib-ios" hidden></small></div>
+      <button type="button" class="btn" id="ib-btn" data-i18n="inst_b">Տեղադրել</button>
+      <button type="button" class="x" id="ib-x" aria-label="×">×</button>
+    </div>
+    <div class="pv">
+      <div class="pv-intro">
+        <p class="eyebrow" data-i18n="hero_eyebrow">Ռեֆերատ · Կուրսային · Դիպլոմային · Թեզ · Պրեզենտացիա</p>
+        <h1 id="h-price" data-i18n="hero_title">Աշխատանքդ՝ <span class="mark">ժամանակին</span> և ըստ քո բուհի պահանջների</h1>
+        <p class="lead" data-i18n="hero_lead">Ընտրիր տեսակը, էջերը և ժամկետը, ու գինը կտեսնես հենց հիմա։ Գրում ենք զրոյից, ձևավորում ենք ըստ ստանդարտի և ուղեկցում ենք մինչև պաշտպանություն։</p>
+      </div>
+
+      <form class="quote" id="quote" aria-labelledby="q-title" onsubmit="return false">
+        <div class="quote-top"><strong id="q-title" data-i18n="q_title">Հաշվիր գինը</strong><span class="badge" data-i18n="q_badge">առանց գրանցման</span></div>
+        <div>
+          <span class="lbl" data-i18n="f_type">Աշխատանքի տեսակ</span>
+          <div class="types" id="q-types" role="radiogroup"></div>
+        </div>
+        <div class="qrow">
+          <div>
+            <label class="lbl" for="q-pages" id="q-pages-lbl">Էջեր</label>
+            <div class="stepper"><button type="button" data-step="-1" aria-label="−">−</button><input id="q-pages" type="number" inputmode="numeric"><button type="button" data-step="1" aria-label="+">+</button></div>
+          </div>
+          <div>
+            <label class="lbl" for="q-date" data-i18n="f_date">Հանձնման օրը</label>
+            <input id="q-date" type="date">
+            <p class="hint" id="q-days"></p>
+          </div>
+        </div>
+        <div><span class="lbl" data-i18n="f_lang">Աշխատանքի լեզուն</span>
+          <div class="seg" role="radiogroup">
+            <label><input type="radio" name="q-lang" value="hy" checked><span data-i18n="l_hy">Հայերեն</span></label>
+            <label><input type="radio" name="q-lang" value="ru"><span data-i18n="l_ru">Ռուսերեն</span></label>
+            <label><input type="radio" name="q-lang" value="en"><span data-i18n="l_en">Անգլերեն</span></label>
+          </div></div>
+        <div class="price-box">
+          <div><small data-i18n="q_price">Մոտավոր գին</small><span class="sum" id="q-sum">—</span><small id="q-split"></small></div>
+          <a class="btn btn-primary" href="#order" data-i18n="q_order">Պատվիրել →</a>
+        </div>
+        <details class="brk"><summary data-i18n="brk">Ինչից է կազմված գինը</summary><ul class="rows" id="q-rows"></ul></details>
+      </form>
+
+      <ul class="ticks pv-ticks">
+        <li><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="9" fill="currentColor" opacity=".15"/><path d="M6 10.5l2.6 2.6L14 7.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="tick1">Վճարում ես 2 մասով՝ կեսը պլանից հետո, կեսը վերջում</span></li>
+        <li><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="9" fill="currentColor" opacity=".15"/><path d="M6 10.5l2.6 2.6L14 7.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="tick2">Ղեկավարի ուղղումներն անվճար են մինչև պաշտպանություն</span></li>
+        <li><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="9" fill="currentColor" opacity=".15"/><path d="M6 10.5l2.6 2.6L14 7.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="tick3">Ստանում ես մասերով, որ տեսնես ընթացքը</span></li>
+      </ul>
+    </div>
+  </div></div>
+
+  <div class="wrap">
+    <div class="block" id="prices">
+      <div class="sec-head">
+        <p class="eyebrow" data-i18n="p_eyebrow">Գներ</p>
+        <h2 data-i18n="p_title">Գինը տեսնում ես նախքան պատվիրելը</h2>
+        <p data-i18n="p_lead">Գինը կախված է էջերից և ժամկետից։ Թաքնված վճարներ չկան։</p>
+      </div>
+      <div class="ptable" id="ptable">
+        <div class="prow head"><span data-i18n="th_type">Տեսակ</span><span data-i18n="th_vol">Ծավալ</span><span data-i18n="th_term">Ժամկետ</span><span data-i18n="th_from">Գինը՝ սկսած</span><span></span></div>
+      </div>
+      <p class="pnote" data-i18n="p_note">Շտապ պատվերի դեպքում (6 օրից քիչ) գինը բարձրանում է 20–100%-ով։ Ռուսերեն և անգլերեն աշխատանքներ՝ +15%։</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== ORDER ===== -->
+<section class="view" id="v-order" aria-labelledby="h-order" hidden>
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow" data-i18n="o_eyebrow">Պատվեր</p>
+      <h1 id="h-order" data-i18n="o_title">3 քայլ և պատրաստ է</h1>
+      <p data-i18n="o_lead_app">Լրացրու ձևը, և կստանաս պատրաստ հաղորդագրություն՝ մեզ ուղարկելու համար։ Հայտը կպահվի «Իմ պատվերները» բաժնում՝ միայն այս սարքում։</p>
+    </div>
+    <div class="order-wrap">
+      <div class="wiz">
+        <ol class="progress" id="progress">
+          <li><button type="button" data-go="1"><span class="bar"></span><span class="cap" data-i18n="w1">1. Ինչ է պետք</span></button></li>
+          <li><button type="button" data-go="2"><span class="bar"></span><span class="cap" data-i18n="w2">2. Ժամկետ և պահանջներ</span></button></li>
+          <li><button type="button" data-go="3"><span class="bar"></span><span class="cap" data-i18n="w3">3. Կոնտակտ</span></button></li>
+        </ol>
+        <form id="wiz" novalidate>
+          <fieldset data-step="1">
+            <legend data-i18n="w1_l">Ինչ աշխատանք է պետք</legend>
+            <div><label class="lbl" for="w-type" data-i18n="f_type">Աշխատանքի տեսակ</label><select id="w-type"></select></div>
+            <div><label class="lbl" for="w-pages" id="w-pages-lbl">Էջեր</label><input id="w-pages" type="number" inputmode="numeric"></div>
+            <div class="full"><label class="lbl" for="w-topic" data-i18n="f_topic">Թեմա</label><input id="w-topic" data-i18n-ph="f_topic_ph" placeholder="Օր.՝ Փոքր բիզնեսի թվային մարքեթինգը Հայաստանում"><p class="hint" data-i18n="f_topic_h">Եթե թեման դեռ չկա, գրիր ուղղությունը, և կառաջարկենք տարբերակներ։</p></div>
+            <div><label class="lbl" for="w-uni" data-i18n="f_uni">Բուհ և ֆակուլտետ</label><input id="w-uni" data-i18n-ph="f_uni_ph" placeholder="Օր.՝ տնտեսագիտական ֆակուլտետ"></div>
+            <div><span class="lbl" data-i18n="f_lang">Աշխատանքի լեզուն</span>
+              <div class="seg" role="radiogroup">
+                <label><input type="radio" name="w-lang" value="hy" checked><span data-i18n="l_hy">Հայերեն</span></label>
+                <label><input type="radio" name="w-lang" value="ru"><span data-i18n="l_ru">Ռուսերեն</span></label>
+                <label><input type="radio" name="w-lang" value="en"><span data-i18n="l_en">Անգլերեն</span></label>
+              </div></div>
+          </fieldset>
+          <fieldset data-step="2" hidden>
+            <legend data-i18n="w2_l">Ժամկետ և պահանջներ</legend>
+            <div><label class="lbl" for="w-date" data-i18n="f_date">Հանձնման օրը</label><input id="w-date" type="date"><p class="hint" id="w-days"></p></div>
+            <div></div>
+            <div class="full checks">
+              <label class="check" id="x-pres-wrap"><input type="checkbox" id="x-pres"><span><b data-i18n="x_pres">Պրեզենտացիա և ելույթի տեքստ</b><small data-i18n="x_pres_d">10–15 սլայդ պաշտպանության համար</small></span></label>
+              <label class="check"><input type="checkbox" id="x-plag"><span><b data-i18n="x_plag">Եզակիության հաշվետվություն</b><small data-i18n="x_plag_d">ստուգման արդյունքը PDF-ով</small></span></label>
+            </div>
+            <div class="full"><label class="lbl" for="w-notes" data-i18n="f_notes">Ղեկավարի պահանջներ</label><textarea id="w-notes" data-i18n-ph="f_notes_ph" placeholder="Գրականության քանակ, պարտադիր գլուխներ, մեթոդական ուղեցույց…"></textarea></div>
+          </fieldset>
+          <fieldset data-step="3" hidden>
+            <legend data-i18n="w3_l">Ինչպես կապվենք քեզ հետ</legend>
+            <div><label class="lbl" for="w-name" data-i18n="f_name">Անուն</label><input id="w-name" autocomplete="given-name" data-i18n-ph="f_name_ph" placeholder="Օր.՝ Անի"></div>
+            <div><label class="lbl" for="w-contact" data-i18n="f_contact">Հեռախոս կամ @username</label><input id="w-contact" autocomplete="tel" placeholder="+374 … / @username"></div>
+            <div class="full"><span class="lbl" data-i18n="f_msgr">Որտեղ գրենք</span>
+              <div class="seg" role="radiogroup">
+                <label><input type="radio" name="w-msgr" value="Telegram" checked><span>Telegram</span></label>
+                <label><input type="radio" name="w-msgr" value="WhatsApp"><span>WhatsApp</span></label>
+                <label><input type="radio" name="w-msgr" value="Viber"><span>Viber</span></label>
+                <label><input type="radio" name="w-msgr" value="call"><span data-i18n="m_call">Զանգ</span></label>
+              </div></div>
+          </fieldset>
+          <div class="result" id="result" hidden>
+            <strong style="font-weight:800;font-size:1.3rem" data-i18n="r_title">Հայտը պատրաստ է</strong>
+            <p style="color:var(--muted)" data-i18n="r_lead">Պատճենիր տեքստը և ուղարկիր մեզ։ Կպատասխանենք գնով և ժամկետով։</p>
+            <pre id="r-text"></pre>
+            <div class="row">
+              <button type="button" class="btn btn-primary" id="r-copy" data-i18n="r_copy">Պատճենել տեքստը</button>
+              <button type="button" class="btn btn-ghost" id="r-share" hidden data-i18n="r_share">Ուղարկել…</button>
+              <a class="btn btn-ghost" id="r-wa" target="_blank" rel="noopener" hidden>WhatsApp</a>
+              <a class="btn btn-ghost" id="r-tg" target="_blank" rel="noopener" hidden>Telegram</a>
+              <span class="ok" id="r-ok" hidden data-i18n="r_ok">Պատճենված է ✓</span>
+            </div>
+            <p class="saved"><span class="ok" data-i18n="r_saved">✓ Պահպանված է «Իմ պատվերները»-ում</span> <a href="#my" data-i18n="r_open">Բացել →</a></p>
+            <div class="contacts" id="r-contacts" style="display:grid;gap:4px;font-size:.9rem;color:var(--muted)"></div>
+          </div>
+          <p class="err" id="w-err" role="alert" hidden></p>
+          <div class="wiz-nav">
+            <button type="button" class="btn btn-ghost" id="w-back" data-i18n="w_back">← Հետ</button>
+            <button type="submit" class="btn btn-primary" id="w-next" data-i18n="w_next">Հաջորդը →</button>
+          </div>
+        </form>
+      </div>
+      <aside class="summary" aria-live="polite">
+        <span class="eyebrow" data-i18n="sum_t">Քո պատվերը</span>
+        <strong id="sum-type" style="font-size:1.1rem"></strong>
+        <span class="sum" id="sum-total">—</span>
+        <ul class="rows" id="sum-list"></ul>
+        <div class="split"><div><span data-i18n="sum_1">Կանխավճար (50%)</span><span class="mono" id="sum-half1"></span></div><div><span data-i18n="sum_2">Վերջում (50%)</span><span class="mono" id="sum-half2"></span></div></div>
+        <small data-i18n="sum_n">Սա նախնական գին է։ Վերջնականը կասենք թեման տեսնելուց հետո։</small>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ===== MY ORDERS ===== -->
+<section class="view" id="v-my" aria-labelledby="h-my" hidden>
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow" data-i18n="my_eyebrow">Հետևիր ժամկետներին</p>
+      <h1 id="h-my" data-i18n="tab_my">Իմ պատվերները</h1>
+      <p data-i18n="my_lead">Այստեղ են քո պատրաստած հայտերը։ Կարգավիճակը նշում ես դու՝ ուղարկե՞լ ես, ընթացքի մե՞ջ է, թե՞ ավարտված է։</p>
+    </div>
+    <div class="olist" id="olist"></div>
+    <div class="empty" id="oempty" hidden>
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v3H9zM9 12h6M9 16h4"/></svg>
+      <h2 data-i18n="my_empty_t">Դեռ հայտ չունես</h2>
+      <p data-i18n="my_empty_d">Հաշվիր գինը և պատրաստիր հայտը 3 քայլով։ Այն կհայտնվի այստեղ, որ հետևես հանձնման օրվան։</p>
+      <a class="btn btn-primary" href="#price" data-i18n="my_empty_b">Հաշվել գինը</a>
+    </div>
+    <p class="privacy"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg><span data-i18n="my_priv">Տվյալները պահվում են միայն այս սարքում և ոչ մեկին չեն ուղարկվում։ Բրաուզերի տվյալները ջնջելիս ցուցակը նույնպես կջնջվի։</span></p>
+  </div>
+</section>
+
+<!-- ===== FAQ / CONTACTS ===== -->
+<section class="view" id="v-faq" aria-labelledby="h-faq" hidden>
+  <div class="wrap">
+    <div class="sec-head"><p class="eyebrow">FAQ</p><h1 id="h-faq" data-i18n="faq_title">Հաճախ տրվող հարցեր</h1></div>
+    <div class="faq">
+      <details><summary data-i18n="q1">Որքա՞ն արագ կպատասխանեք</summary><p data-i18n="a1">Աշխատանքային ժամերին պատասխանում ենք 30 րոպեի ընթացքում՝ գնով և ժամկետով։</p></details>
+      <details><summary data-i18n="q2">Կարո՞ղ եմ վճարել մասերով</summary><p data-i18n="a2">Այո։ 50%՝ պլանը հաստատելուց հետո, մնացածը՝ վերջնական ֆայլը ստանալուց առաջ։ Վճարման եղանակը համաձայնեցնում ենք քեզ հետ։</p></details>
+      <details><summary data-i18n="q3">Իսկ եթե ղեկավարը դիտողություններ անի</summary><p data-i18n="a3">Դիտողությունները կատարում ենք անվճար մինչև պաշտպանություն։ Եթե թեման կամ ծավալը փոխվում է, վերահաշվում ենք միայն նոր մասը։</p></details>
+      <details><summary data-i18n="q4">Թեմա դեռ չունեմ։ Կօգնե՞ք</summary><p data-i18n="a4">Այո։ Գրիր ուղղությունը կամ առարկան, և կառաջարկենք 3–5 թեմա, որոնցից կընտրես ղեկավարի հետ։</p></details>
+      <details><summary data-i18n="q5">Աշխատանքը եզակի՞ է</summary><p data-i18n="a5">Յուրաքանչյուր աշխատանք գրվում է զրոյից՝ քո թեմայով։ Ցանկության դեպքում տալիս ենք եզակիության ստուգման հաշվետվություն։</p></details>
+      <details><summary data-i18n="q6">Ի՞նչ ֆայլ եմ ստանալու</summary><p data-i18n="a6">Word (.docx), որը կարող ես խմբագրել, և PDF։ Պրեզենտացիան՝ PowerPoint և PDF։</p></details>
+    </div>
+
+    <div class="block ccard">
+      <h2 data-i18n="c_title">Կապ մեզ հետ</h2>
+      <div class="msgr">
+        <small data-i18n="msgr">Գրիր քեզ հարմար տեղում՝</small>
+        <span class="chip-m"><i style="background:#2aa9e0"></i>Telegram</span>
+        <span class="chip-m"><i style="background:#25d366"></i>WhatsApp</span>
+        <span class="chip-m"><i style="background:#7360f2"></i>Viber</span>
+      </div>
+      <div class="contacts" id="contacts"></div>
+      <a class="btn btn-primary" href="#order" data-i18n="cta_order">Պատվիրել</a>
+    </div>
+
+    <div class="block">
+      <div class="sec-head"><p class="eyebrow" data-i18n="g_eyebrow">Երաշխիքներ</p><h2 data-i18n="g_title">Ինչու ուսանողները հանգիստ են մեզ հետ</h2></div>
+      <div class="guar">
+        <div class="g"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h4"/></svg></span><h3 data-i18n="g1_t">Վճարում 2 մասով</h3><p data-i18n="g1_d">50%՝ երբ հաստատում ես պլանը, մնացածը՝ վերջնական ֆայլից առաջ։ Ամբողջը միանգամից վճարել պետք չէ։</p></div>
+        <div class="g"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/></svg></span><h3 data-i18n="g2_t">Ուղղումներ՝ անվճար</h3><p data-i18n="g2_d">Ղեկավարի դիտողությունները կատարում ենք անվճար մինչև պաշտպանություն, եթե թեման և ծավալը չեն փոխվում։</p></div>
+        <div class="g"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg></span><h3 data-i18n="g3_t">Ըստ քո ամբիոնի ուղեցույցի</h3><p data-i18n="g3_d">Ուղարկիր մեթոդական ուղեցույցը, և կձևավորենք ճիշտ դրանով՝ տիտղոսաթերթից մինչև հավելվածներ։</p></div>
+        <div class="g"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4M8 11l2 2 4-4"/></svg></span><h3 data-i18n="g4_t">Եզակիության ստուգում</h3><p data-i18n="g4_d">Գրում ենք զրոյից և ցանկության դեպքում տալիս ենք ստուգման հաշվետվությունը։</p></div>
+        <div class="g"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></span><h3 data-i18n="g5_t">Գաղտնիություն</h3><p data-i18n="g5_d">Քո անունը, բուհը և աշխատանքը ոչ մեկին չենք փոխանցում։</p></div>
+        <div class="g"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a8 8 0 01-11.6 7.1L4 20l1-4.6A8 8 0 1121 12z"/></svg></span><h3 data-i18n="g6_t">Մեկ կոնտակտ ամբողջ ընթացքում</h3><p data-i18n="g6_d">Մասնագետին մենք ենք ընտրում ըստ քո ֆակուլտետի։ Դու գրում ես մեկ մարդու՝ Telegram-ով, WhatsApp-ով կամ Viber-ով։</p></div>
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="sec-head"><p class="eyebrow" data-i18n="h_eyebrow">Ընթացքը</p><h2 data-i18n="h_title">Հայտից մինչև պատրաստ ֆայլ</h2></div>
+      <ol class="steps">
+        <li><h3 data-i18n="s1_t">Հայտ</h3><p data-i18n="s1_d">Լրացնում ես ձևը կամ գրում ես մեզ։</p></li>
+        <li><h3 data-i18n="s2_t">Գին և պլան</h3><p data-i18n="s2_d">Ասում ենք վերջնական գինը և կազմում բովանդակությունը, որը հաստատում ես ղեկավարի հետ։</p></li>
+        <li><h3 data-i18n="s3_t">Կանխավճար</h3><p data-i18n="s3_d">Վճարում ես կեսը, և սկսում ենք գրել։</p><span class="pay">50%</span></li>
+        <li><h3 data-i18n="s4_t">Գրում ենք մասերով</h3><p data-i18n="s4_d">Ուղարկում ենք գլուխ առ գլուխ, որ ժամանակին ցույց տաս ղեկավարին։</p></li>
+        <li><h3 data-i18n="s5_t">Վերջնական ֆայլ</h3><p data-i18n="s5_d">Վճարում ես մնացածը և ստանում Word + PDF։ Ուղղումները՝ մինչև պաշտպանություն։</p><span class="pay">50%</span></li>
+      </ol>
+    </div>
+
+    <div class="block">
+      <div class="sec-head"><p class="eyebrow" data-i18n="sm_eyebrow">Նմուշներ</p><h2 data-i18n="sm_title">Այսպես կունենա քո աշխատանքը</h2><p data-i18n="sm_lead">GHEA Grapalat 12, միջտողային 1.5, լուսանցքներ՝ ձախից 3, աջից 1.5, վերևից և ներքևից 2 սմ։ Գլուխները սկսվում են նոր էջից։</p></div>
+      <div class="samples">
+        <figure>
+          <div class="sheet" aria-hidden="true">
+            <span class="c mut" style="font-weight:700">ԲՈՒՀԻ ԱՆՎԱՆՈՒՄԸ<br>ՖԱԿՈՒԼՏԵՏ · ԱՄԲԻՈՆ</span>
+            <span class="c big">ԴԻՊԼՈՄԱՅԻՆ<br>ԱՇԽԱՏԱՆՔ</span>
+            <span class="c mut" style="margin-top:.8em">Թեմա՝ «Փոքր բիզնեսի թվային մարքեթինգը Հայաստանում»</span>
+            <span class="mut" style="margin-top:auto;text-align:right">Ուսանող՝ ________<br>Ղեկավար՝ ________</span>
+            <span class="c" style="margin-top:1em;font-weight:700">ԵՐԵՎԱՆ 2026</span>
+          </div>
+          <figcaption data-i18n="sm1">Տիտղոսաթերթ<small>ըստ ամբիոնի օրինակի</small></figcaption>
+        </figure>
+        <figure>
+          <div class="sheet" aria-hidden="true">
+            <span class="c" style="font-weight:800;font-size:1.2em">ԲՈՎԱՆԴԱԿՈՒԹՅՈՒՆ</span>
+            <div class="toc">
+              <div><span>Ներածություն</span><span>3</span></div>
+              <div><span>Գլուխ 1. Տեսական հիմքեր</span><span>6</span></div>
+              <div class="sub"><span>1.1. Հասկացություններ</span><span>6</span></div>
+              <div class="sub"><span>1.2. Միջազգային փորձ</span><span>14</span></div>
+              <div><span>Գլուխ 2. Հետազոտություն</span><span>22</span></div>
+              <div class="sub"><span>2.1. Մեթոդաբանություն</span><span>22</span></div>
+              <div class="sub"><span>2.2. Արդյունքներ</span><span>31</span></div>
+              <div><span>Եզրակացություններ</span><span>48</span></div>
+              <div><span>Գրականության ցանկ</span><span>51</span></div>
+              <div><span>Հավելվածներ</span><span>55</span></div>
+            </div>
+          </div>
+          <figcaption data-i18n="sm2">Բովանդակություն<small>ավտոմատ, էջահամարներով</small></figcaption>
+        </figure>
+        <figure>
+          <div class="sheet" aria-hidden="true">
+            <span style="font-weight:800;font-size:1.1em">ԳԼՈՒԽ 1. ՏԵՍԱԿԱՆ ՀԻՄՔԵՐ</span>
+            <span style="font-weight:700;margin-top:.8em">1.1. Հասկացություններ</span>
+            <span class="ln"></span><span class="ln"></span><span class="ln" style="width:88%"></span><span class="ln"></span><span class="ln" style="width:70%"></span>
+            <span class="ln" style="margin-top:1em"></span><span class="ln"></span><span class="ln" style="width:92%"></span><span class="ln" style="width:60%"></span>
+            <span class="fn"></span><span class="mut">¹ Աղբյուրի հղում, էջ 24։</span>
+            <span class="pg">6</span>
+          </div>
+          <figcaption data-i18n="sm3">Գլխի էջ<small>ծանոթագրությամբ և էջահամարով</small></figcaption>
+        </figure>
+        <figure>
+          <div class="sheet wide" aria-hidden="true">
+            <span style="font-weight:800;font-size:1.25em">Հետազոտության արդյունքներ</span>
+            <div class="bars"><i style="height:38%"></i><i style="height:62%"></i><i style="height:92%"></i><i style="height:54%"></i></div>
+            <span class="mut" style="margin-top:4%;text-align:right;font-family:var(--mono)">07 / 12</span>
+          </div>
+          <figcaption data-i18n="sm4">Պրեզենտացիա<small>պաշտպանության, սեմինարի կամ բիզնեսի համար</small></figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="sec-head"><p class="eyebrow" data-i18n="sb_eyebrow">Առարկաներ</p><h2 data-i18n="sb_title">Գրում ենք տարբեր ֆակուլտետների համար</h2></div>
+      <div class="subjects">
+        <span data-i18n="sb1">Տնտեսագիտություն</span><span data-i18n="sb2">Կառավարում և մարքեթինգ</span><span data-i18n="sb3">Ֆինանսներ և հաշվապահություն</span><span data-i18n="sb4">Իրավագիտություն</span><span data-i18n="sb5">Մանկավարժություն</span><span data-i18n="sb6">Հոգեբանություն</span><span data-i18n="sb7">Պատմություն</span><span data-i18n="sb8">Բանասիրություն</span><span data-i18n="sb9">Միջազգային հարաբերություններ</span><span data-i18n="sb10">Զբոսաշրջություն</span><span data-i18n="sb11">Ինֆորմատիկա</span><span data-i18n="sb12">Առողջապահություն</span>
+      </div>
+      <p class="pnote" data-i18n="sb_note">Քո առարկան այստեղ չկա՞։ Գրիր մեզ, և կասենք՝ կարո՞ղ ենք օգնել։</p>
+    </div>
+
+    <div class="block icard" id="install-card">
+      <img src="icons/icon-192.png" alt="" width="56" height="56">
+      <div>
+        <h3 data-i18n="inst_t">Տեղադրիր հավելվածը</h3>
+        <p data-i18n="inst_d">Գրիչը կբացվի հեռախոսի գլխավոր էկրանից, իսկ գինը կարող ես հաշվել նույնիսկ առանց ինտերնետի։</p>
+        <p id="inst-hint" class="ok" hidden></p>
+        <button type="button" class="btn btn-primary btn-sm" id="inst-btn" hidden data-i18n="inst_b">Տեղադրել</button>
+      </div>
+    </div>
+
+    <div class="foot"><strong>Գրիչ</strong><p data-i18n="foot_d">Ռեֆերատների, կուրսայինների, դիպլոմային աշխատանքների և պրեզենտացիաների գրում և ձևավորում · Երևան</p></div>
+  </div>
+</section>
+</main>
+
+<nav class="tabbar" aria-label="Բաժիններ">
+  <a href="#price" data-tab="price"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 16h.01M12 16h.01M15.5 16h.01"/></svg><span data-i18n="tab_price">Գին</span></a>
+  <a href="#order" data-tab="order"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/></svg><span data-i18n="tab_order">Պատվեր</span></a>
+  <a href="#my" data-tab="my"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v3H9zM9 12h6M9 16h4"/></svg><span data-i18n="tab_my">Իմ պատվերները</span><span class="count" hidden></span></a>
+  <a href="#faq" data-tab="faq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 015 0c0 1.7-2.5 2-2.5 4M12 17h.01"/></svg><span data-i18n="tab_faq">Հարցեր</span></a>
+</nav>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+/* ===== Կոնտակտներ — լրացրեք այստեղ (նույնը, ինչ կայքում) ===== */
+const CONTACT = {
+  phone: "",      // օր.՝ "+374 99 123456" (Viber-ի և զանգի համար)
+  whatsapp: "",   // միայն թվեր, օր.՝ "37499123456"
+  telegram: ""    // առանց @, օր.՝ "grich_am"
+};
+/* ===== Գներ ===== rate՝ ֏ մեկ էջի (պրեզենտացիայի դեպքում՝ մեկ սլայդի) համար */
+const TYPES = {
+  ref:  { rate:1000, min:10, max:40,  def:15, term:"2–5",  unit:"p" },
+  kurs: { rate:1500, min:20, max:60,  def:30, term:"7–14", unit:"p" },
+  dipl: { rate:2000, min:40, max:100, def:60, term:"21–42",unit:"p" },
+  mag:  { rate:2500, min:60, max:120, def:80, term:"28–56",unit:"p" },
+  pres: { rate:800,  min:8,  max:40,  def:12, term:"1–3",  unit:"s" },
+  form: { rate:300,  min:5,  max:150, def:60, term:"1–2",  unit:"p" }
+};
+const EXTRA = { pres:8000, plag:3000 };
+const LANG_UP = 0.15;
+function urgency(days){ return days >= 14 ? 1 : days >= 7 ? 1.2 : days >= 3 ? 1.5 : 2; }
+
+const RU = {
+  nav_prices:"Цены", nav_samples:"Образцы", nav_how:"Как мы работаем", nav_faq:"Вопросы", cta_order:"Заказать",
+  hero_eyebrow:"Реферат · Курсовая · Дипломная · Диссертация · Презентация",
+  hero_title:'Твоя работа — <span class="mark">вовремя</span> и по требованиям твоего вуза',
+  hero_lead:"Выбери тип, объём и срок, и цена появится сразу. Пишем с нуля, оформляем по стандарту и сопровождаем до защиты.",
+  tick1:"Оплата в 2 части: половина после плана, половина в конце", tick2:"Правки руководителя бесплатно до защиты", tick3:"Присылаем по частям, чтобы ты видел ход работы",
+  msgr:"Пиши, где удобно:", q_title:"Рассчитай цену", q_badge:"без регистрации", f_type:"Тип работы", f_date:"День сдачи",
+  q_price:"Примерная цена", q_next:"Продолжить →",
+  g_eyebrow:"Гарантии", g_title:"Почему студентам с нами спокойно",
+  g1_t:"Оплата в 2 части", g1_d:"50% — когда утверждаешь план, остальное — перед итоговым файлом. Платить всё сразу не нужно.",
+  g2_t:"Правки бесплатно", g2_d:"Замечания руководителя вносим бесплатно до защиты, если тема и объём не меняются.",
+  g3_t:"По методичке твоей кафедры", g3_d:"Пришли методические указания — оформим строго по ним, от титульного листа до приложений.",
+  g4_t:"Проверка уникальности", g4_d:"Пишем с нуля и по желанию даём отчёт о проверке.",
+  g5_t:"Конфиденциальность", g5_d:"Твоё имя, вуз и работу никому не передаём.",
+  g6_t:"Один контакт на всё время", g6_d:"Специалиста подбираем мы — по твоему факультету. Ты пишешь одному человеку в Telegram, WhatsApp или Viber.",
+  p_eyebrow:"Цены", p_title:"Цену видишь до заказа", p_lead:"Цена зависит от объёма и срока. Скрытых платежей нет.",
+  th_type:"Тип", th_vol:"Объём", th_term:"Срок", th_from:"Цена от",
+  p_note:"При срочном заказе (меньше 6 дней) цена выше на 20–100%. Работы на русском и английском — +15%.",
+  sm_eyebrow:"Образцы", sm_title:"Так будет выглядеть твоя работа",
+  sm_lead:"GHEA Grapalat 12, интервал 1.5, поля: слева 3, справа 1.5, сверху и снизу 2 см. Главы начинаются с новой страницы.",
+  sm1:"Титульный лист<small>по образцу кафедры</small>", sm2:"Содержание<small>автоматическое, с номерами страниц</small>",
+  sm3:"Страница главы<small>со сноской и номером страницы</small>", sm4:"Презентация<small>для защиты, семинара или бизнеса</small>",
+  h_eyebrow:"Процесс", h_title:"От заявки до готового файла",
+  s1_t:"Заявка", s1_d:"Заполняешь форму или пишешь нам.",
+  s2_t:"Цена и план", s2_d:"Называем итоговую цену и составляем содержание, которое ты согласуешь с руководителем.",
+  s3_t:"Предоплата", s3_d:"Платишь половину, и мы начинаем писать.",
+  s4_t:"Пишем по частям", s4_d:"Присылаем по главам, чтобы ты вовремя показывал руководителю.",
+  s5_t:"Итоговый файл", s5_d:"Платишь остаток и получаешь Word + PDF. Правки — до защиты.",
+  o_eyebrow:"Заказ", o_title:"3 шага — и готово",
+  o_lead:"Заполни форму и получи готовое сообщение. Останется отправить его нам в удобном мессенджере. Заполненное сохраняется в этом браузере.",
+  w1:"1. Что нужно", w2:"2. Срок и требования", w3:"3. Контакт",
+  w1_l:"Какая работа нужна", f_topic:"Тема", f_topic_ph:"Например: Цифровой маркетинг малого бизнеса в Армении",
+  f_topic_h:"Если темы ещё нет, напиши направление — предложим варианты.", f_uni:"Вуз и факультет", f_uni_ph:"Например: экономический факультет",
+  f_lang:"Язык работы", l_hy:"Армянский", l_ru:"Русский", l_en:"Английский",
+  w2_l:"Срок и требования", x_pres:"Презентация и текст выступления", x_pres_d:"10–15 слайдов для защиты",
+  x_plag:"Отчёт об уникальности", x_plag_d:"результат проверки в PDF", f_notes:"Требования руководителя",
+  f_notes_ph:"Количество источников, обязательные главы, методичка…",
+  w3_l:"Как с тобой связаться", f_name:"Имя", f_name_ph:"Например: Анна", f_contact:"Телефон или @username", f_msgr:"Куда написать", m_call:"Звонок",
+  r_title:"Заявка готова", r_lead:"Скопируй текст и отправь нам. Ответим с ценой и сроком.", r_copy:"Скопировать текст", r_ok:"Скопировано ✓",
+  w_back:"← Назад", w_next:"Далее →",
+  sum_t:"Твой заказ", sum_1:"Предоплата (50%)", sum_2:"В конце (50%)", sum_n:"Это предварительная цена. Итоговую назовём, когда увидим тему.",
+  sb_eyebrow:"Предметы", sb_title:"Пишем для разных факультетов",
+  sb1:"Экономика", sb2:"Менеджмент и маркетинг", sb3:"Финансы и бухучёт", sb4:"Юриспруденция", sb5:"Педагогика", sb6:"Психология",
+  sb7:"История", sb8:"Филология", sb9:"Международные отношения", sb10:"Туризм", sb11:"Информатика", sb12:"Здравоохранение",
+  sb_note:"Твоего предмета нет в списке? Напиши нам — скажем, сможем ли помочь.",
+  faq_title:"Частые вопросы",
+  q1:"Как быстро вы ответите?", a1:"В рабочее время отвечаем в течение 30 минут — с ценой и сроком.",
+  q2:"Можно платить частями?", a2:"Да. 50% после утверждения плана, остальное — перед получением итогового файла. Способ оплаты согласуем с тобой.",
+  q3:"А если руководитель сделает замечания?", a3:"Замечания вносим бесплатно до защиты. Если меняется тема или объём, пересчитываем только новую часть.",
+  q4:"У меня ещё нет темы. Поможете?", a4:"Да. Напиши направление или предмет — предложим 3–5 тем, из которых ты выберешь с руководителем.",
+  q5:"Работа уникальная?", a5:"Каждая работа пишется с нуля по твоей теме. По желанию даём отчёт о проверке на уникальность.",
+  q6:"Какой файл я получу?", a6:"Word (.docx), который можно редактировать, и PDF. Презентацию — в PowerPoint и PDF.",
+  foot_d:"Написание и оформление рефератов, курсовых, дипломных работ и презентаций · Ереван"
+};
+const EN = {
+  nav_prices:"Prices", nav_samples:"Samples", nav_how:"How it works", nav_faq:"FAQ", cta_order:"Order",
+  hero_eyebrow:"Essay · Coursework · Diploma · Thesis · Presentation",
+  hero_title:'Your paper — <span class="mark">on time</span> and to your university’s rules',
+  hero_lead:"Pick the type, length and deadline, and you’ll see the price right away. We write from scratch, format to the standard and support you until the defense.",
+  tick1:"Pay in 2 parts: half after the outline, half at the end", tick2:"Your supervisor’s corrections are free until the defense", tick3:"You get it chapter by chapter, so you see the progress",
+  msgr:"Message us where it suits you:", q_title:"Check the price", q_badge:"no sign-up", f_type:"Type of work", f_date:"Due date",
+  q_price:"Estimated price", q_next:"Continue →",
+  g_eyebrow:"Guarantees", g_title:"Why students feel safe with us",
+  g1_t:"Pay in 2 parts", g1_d:"50% when you approve the outline, the rest before the final file. No need to pay everything at once.",
+  g2_t:"Free corrections", g2_d:"We make your supervisor’s corrections for free until the defense, as long as the topic and length stay the same.",
+  g3_t:"Your department’s guidelines", g3_d:"Send us the guidelines and we’ll format exactly to them, from the title page to the appendices.",
+  g4_t:"Originality check", g4_d:"We write from scratch and, on request, give you the check report.",
+  g5_t:"Privacy", g5_d:"We never share your name, university or paper with anyone.",
+  g6_t:"One contact the whole way", g6_d:"We pick the specialist for your faculty. You talk to one person on Telegram, WhatsApp or Viber.",
+  p_eyebrow:"Prices", p_title:"See the price before you order", p_lead:"The price depends on length and deadline. No hidden fees.",
+  th_type:"Type", th_vol:"Length", th_term:"Time", th_from:"Price from",
+  p_note:"Urgent orders (under 6 days) cost 20–100% more. Papers in Russian or English: +15%.",
+  sm_eyebrow:"Samples", sm_title:"This is how your paper will look",
+  sm_lead:"GHEA Grapalat 12, 1.5 line spacing, margins: left 3, right 1.5, top and bottom 2 cm. Chapters start on a new page.",
+  sm1:"Title page<small>per your department’s template</small>", sm2:"Contents<small>automatic, with page numbers</small>",
+  sm3:"Chapter page<small>with footnote and page number</small>", sm4:"Presentation<small>for a defense, seminar or business</small>",
+  h_eyebrow:"Process", h_title:"From request to finished file",
+  s1_t:"Request", s1_d:"Fill in the form or message us.",
+  s2_t:"Price and outline", s2_d:"We confirm the final price and draft the contents for you to approve with your supervisor.",
+  s3_t:"Deposit", s3_d:"You pay half, and we start writing.",
+  s4_t:"Written in parts", s4_d:"We send it chapter by chapter, so you can show your supervisor on time.",
+  s5_t:"Final file", s5_d:"Pay the rest and get Word + PDF. Corrections until the defense.",
+  o_eyebrow:"Order", o_title:"3 steps and you’re done",
+  o_lead:"Fill in the form and get a ready message. Then just send it to us in your favorite messenger. What you enter is saved in this browser.",
+  w1:"1. What you need", w2:"2. Deadline and requirements", w3:"3. Contact",
+  w1_l:"What kind of paper", f_topic:"Topic", f_topic_ph:"E.g. Digital marketing for small businesses in Armenia",
+  f_topic_h:"No topic yet? Write the field and we’ll suggest options.", f_uni:"University and faculty", f_uni_ph:"E.g. Faculty of Economics",
+  f_lang:"Language of the paper", l_hy:"Armenian", l_ru:"Russian", l_en:"English",
+  w2_l:"Deadline and requirements", x_pres:"Presentation and speech", x_pres_d:"10–15 slides for the defense",
+  x_plag:"Originality report", x_plag_d:"check results as a PDF", f_notes:"Supervisor’s requirements",
+  f_notes_ph:"Number of sources, required chapters, guidelines…",
+  w3_l:"How to reach you", f_name:"Name", f_name_ph:"E.g. Ani", f_contact:"Phone or @username", f_msgr:"Where to message you", m_call:"Call",
+  r_title:"Your request is ready", r_lead:"Copy the text and send it to us. We’ll reply with the price and deadline.", r_copy:"Copy text", r_ok:"Copied ✓",
+  w_back:"← Back", w_next:"Next →",
+  sum_t:"Your order", sum_1:"Deposit (50%)", sum_2:"At the end (50%)", sum_n:"This is an estimate. We’ll confirm the final price once we see the topic.",
+  sb_eyebrow:"Subjects", sb_title:"We write for many faculties",
+  sb1:"Economics", sb2:"Management and marketing", sb3:"Finance and accounting", sb4:"Law", sb5:"Education", sb6:"Psychology",
+  sb7:"History", sb8:"Philology", sb9:"International relations", sb10:"Tourism", sb11:"Computer science", sb12:"Healthcare",
+  sb_note:"Don’t see your subject? Message us and we’ll tell you if we can help.",
+  faq_title:"Frequently asked questions",
+  q1:"How fast do you reply?", a1:"During working hours we reply within 30 minutes with the price and deadline.",
+  q2:"Can I pay in parts?", a2:"Yes. 50% after you approve the outline, the rest before you get the final file. We agree on the payment method with you.",
+  q3:"What if my supervisor has comments?", a3:"We make the corrections for free until the defense. If the topic or length changes, we only charge for the new part.",
+  q4:"I don’t have a topic yet. Can you help?", a4:"Yes. Tell us your field or subject and we’ll suggest 3–5 topics to choose from with your supervisor.",
+  q5:"Is the paper original?", a5:"Every paper is written from scratch on your topic. On request, we provide an originality check report.",
+  q6:"What file will I get?", a6:"An editable Word (.docx) file and a PDF. Presentations come as PowerPoint and PDF.",
+  foot_d:"Writing and formatting of essays, coursework, diploma papers and presentations · Yerevan"
+};
+/* app-only texts (Armenian originals are in the HTML) */
+Object.assign(RU, {
+  tab_price:"Цена", tab_order:"Заказ", tab_my:"Мои заказы", tab_faq:"Вопросы",
+  q_order:"Заказать →", brk:"Из чего складывается цена",
+  o_lead_app:"Заполни форму и получи готовое сообщение, чтобы отправить нам. Заявка сохранится в разделе «Мои заказы» — только на этом устройстве.",
+  r_share:"Отправить…", r_saved:"✓ Сохранено в «Мои заказы»", r_open:"Открыть →",
+  my_eyebrow:"Следи за сроками",
+  my_lead:"Здесь заявки, которые ты подготовил(а). Статус отмечаешь сам(а): отправлена, в работе или готова.",
+  my_empty_t:"Пока нет заявок", my_empty_d:"Рассчитай цену и подготовь заявку за 3 шага. Она появится здесь, чтобы ты следил(а) за днём сдачи.", my_empty_b:"Рассчитать цену",
+  my_priv:"Данные хранятся только на этом устройстве и никуда не отправляются. Если очистить данные браузера, список тоже удалится.",
+  c_title:"Связаться с нами",
+  inst_t:"Установи приложение", inst_b:"Установить",
+  inst_d:"Грич будет открываться с главного экрана телефона, а цену можно считать даже без интернета."
+});
+Object.assign(EN, {
+  tab_price:"Price", tab_order:"Order", tab_my:"My orders", tab_faq:"FAQ",
+  q_order:"Order →", brk:"What makes up the price",
+  o_lead_app:"Fill in the form and get a ready message to send us. The request is saved in “My orders” — on this device only.",
+  r_share:"Send…", r_saved:"✓ Saved to “My orders”", r_open:"Open →",
+  my_eyebrow:"Track your deadlines",
+  my_lead:"Here are the requests you prepared. You set the status yourself: sent, in progress or done.",
+  my_empty_t:"No requests yet", my_empty_d:"Check the price and prepare a request in 3 steps. It will appear here so you can track the due date.", my_empty_b:"Check the price",
+  my_priv:"The data stays on this device only and is never sent anywhere. Clearing your browser data also clears this list.",
+  c_title:"Contact us",
+  inst_t:"Install the app", inst_b:"Install",
+  inst_d:"Grich opens from your home screen, and you can check prices even offline."
+});
+const DICT = { ru:RU, en:EN };
+const T = {
+  en:{ names:{ref:"Essay",kurs:"Coursework",dipl:"Diploma paper",mag:"Master’s thesis",pres:"Presentation",form:"Formatting"},
+       desc:{ref:"source review",kurs:"theory and practical part",dipl:"graduation paper",mag:"research and abstract",pres:"PowerPoint + speech",form:"formatting your own text"},
+       p:"pages", s:"slides", lblP:"Pages", lblS:"Slides", days:"days", pick:"Choose",
+       left:n=>`${n} days left`, past:"Pick a later date", rush:n=>`urgent: +${n}%`,
+       base:"Base price", urg:"Urgency", lang:"Language (+15%)", pres:"Presentation", plag:"Originality check",
+       errTopic:"Write the topic or field.", errDate:"Pick a due date after today.", errContact:"Write your name and phone or @username.",
+       send:"Prepare request", newO:"New request", nocontact:"Contacts coming soon", phone:"Phone / Viber",
+       langs:{hy:"Armenian",ru:"Russian",en:"English"}, call:"Call",
+       m:["Hello, I’d like to order a paper.","Type","Topic","Length","Due date","Language","University","Extras","Requirements","Name","Contact","Reach me via","Estimated price (from the site)"] },
+  hy:{ names:{ref:"Ռեֆերատ",kurs:"Կուրսային",dipl:"Դիպլոմային",mag:"Մագիստրոսական թեզ",pres:"Պրեզենտացիա",form:"Ձևավորում"},
+       desc:{ref:"աղբյուրների վերլուծություն",kurs:"տեսական և գործնական մաս",dipl:"ավարտական աշխատանք",mag:"հետազոտություն և սեղմագիր",pres:"PowerPoint + ելույթի տեքստ",form:"պատրաստի տեքստի ձևավորում"},
+       p:"էջ", s:"սլայդ", lblP:"Էջեր", lblS:"Սլայդներ", days:"օր", pick:"Ընտրել",
+       left:n=>`մնաց ${n} օր`, past:"Ընտրիր ավելի ուշ ամսաթիվ", rush:n=>`շտապ՝ +${n}%`,
+       base:"Հիմնական", urg:"Շտապություն", lang:"Լեզու (+15%)", pres:"Պրեզենտացիա", plag:"Եզակիության ստուգում",
+       errTopic:"Գրիր թեման կամ ուղղությունը։", errDate:"Ընտրիր հանձնման օրը (այսօրվանից հետո)։", errContact:"Գրիր անունդ և հեռախոսը կամ @username-ը։",
+       send:"Պատրաստել հայտը", newO:"Նոր հայտ", nocontact:"Կոնտակտները շուտով կավելացվեն", phone:"Հեռախոս / Viber",
+       langs:{hy:"Հայերեն",ru:"Ռուսերեն",en:"Անգլերեն"}, call:"Զանգ",
+       m:["Բարև, ուզում եմ պատվիրել աշխատանք։","Տեսակ","Թեմա","Ծավալ","Ժամկետ","Լեզու","Բուհ","Լրացուցիչ","Պահանջներ","Անուն","Կոնտակտ","Կապ","Նախնական գին (կայքից)"] },
+  ru:{ names:{ref:"Реферат",kurs:"Курсовая",dipl:"Дипломная",mag:"Магистерская",pres:"Презентация",form:"Оформление"},
+       desc:{ref:"анализ источников",kurs:"теория и практическая часть",dipl:"выпускная работа",mag:"исследование и автореферат",pres:"PowerPoint + текст выступления",form:"оформление готового текста"},
+       p:"стр.", s:"слайд.", lblP:"Страниц", lblS:"Слайдов", days:"дн.", pick:"Выбрать",
+       left:n=>`осталось ${n} дн.`, past:"Выбери более позднюю дату", rush:n=>`срочно: +${n}%`,
+       base:"Основная стоимость", urg:"Срочность", lang:"Язык (+15%)", pres:"Презентация", plag:"Проверка уникальности",
+       errTopic:"Напиши тему или направление.", errDate:"Выбери день сдачи (позже сегодняшнего).", errContact:"Напиши имя и телефон или @username.",
+       send:"Подготовить заявку", newO:"Новая заявка", nocontact:"Контакты скоро появятся", phone:"Телефон / Viber",
+       langs:{hy:"Армянский",ru:"Русский",en:"Английский"}, call:"Звонок",
+       m:["Здравствуйте, хочу заказать работу.","Тип","Тема","Объём","Срок","Язык","Вуз","Дополнительно","Требования","Имя","Контакт","Связь","Предварительная цена (с сайта)"] }
+};
+/* app-only dynamic texts */
+const A = {
+  hy:{ from:"սկսած", st:{ready:"Նոր",sent:"Ուղարկված",work:"Ընթացքում",done:"Ավարտված"},
+       today:"Հանձնում՝ այսօր", over:"Ժամկետն անցել է", fin:"Ավարտված ✓", due:"Հանձնում", made:"Ստեղծված",
+       copy:"Պատճենել", share:"Ուղարկել…", del:"Ջնջել", delQ:"Հաստատե՞լ ջնջումը", deleted:"Հայտը ջնջված է",
+       split:(a,b)=>`Կանխավճար ${a} · վերջում ${b}`, status:"Կարգավիճակ",
+       offline:"Ինտերնետ չկա։ Հաշվիչը և պատվերները աշխատում են։", online:"Ինտերնետը վերականգնվեց",
+       installed:"Հավելվածը տեղադրված է ✓", ios:"iPhone-ում սեղմիր «Կիսվել» կոճակը և ընտրիր «Add to Home Screen»։",
+       other:"Բրաուզերի մենյուում ընտրիր «Տեղադրել հավելվածը» կամ «Ավելացնել գլխավոր էկրանին»։",
+       update:"Կա նոր տարբերակ", reload:"Թարմացնել", copyFail:"Նշիր տեքստը և պատճենիր ձեռքով" },
+  ru:{ from:"от", st:{ready:"Новая",sent:"Отправлена",work:"В работе",done:"Завершена"},
+       today:"Сдача сегодня", over:"Срок прошёл", fin:"Завершена ✓", due:"Сдача", made:"Создана",
+       copy:"Скопировать", share:"Отправить…", del:"Удалить", delQ:"Точно удалить?", deleted:"Заявка удалена",
+       split:(a,b)=>`Предоплата ${a} · в конце ${b}`, status:"Статус",
+       offline:"Нет интернета. Калькулятор и заказы работают.", online:"Интернет снова есть",
+       installed:"Приложение установлено ✓", ios:"На iPhone нажми «Поделиться» и выбери «На экран „Домой“».",
+       other:"В меню браузера выбери «Установить приложение» или «Добавить на главный экран».",
+       update:"Есть новая версия", reload:"Обновить", copyFail:"Выдели текст и скопируй вручную" },
+  en:{ from:"from", st:{ready:"New",sent:"Sent",work:"In progress",done:"Done"},
+       today:"Due today", over:"Overdue", fin:"Done ✓", due:"Due", made:"Created",
+       copy:"Copy", share:"Send…", del:"Delete", delQ:"Delete for sure?", deleted:"Request deleted",
+       split:(a,b)=>`Deposit ${a} · at the end ${b}`, status:"Status",
+       offline:"You’re offline. The calculator and orders still work.", online:"Back online",
+       installed:"The app is installed ✓", ios:"On iPhone, tap Share and choose “Add to Home Screen”.",
+       other:"In your browser menu, choose “Install app” or “Add to Home screen”.",
+       update:"A new version is available", reload:"Refresh", copyFail:"Select the text and copy it by hand" }
+};
+
+const $ = id => document.getElementById(id);
+const round = n => Math.round(n/100)*100;
+const money = n => round(n).toLocaleString("ru-RU").replace(/\s/g," ") + " ֏";
+const iso = d => d.toISOString().slice(0,10);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmtDate = s => s ? s.split("-").reverse().join(".") : "";
+function addDays(n){ const d = new Date(); d.setHours(12,0,0,0); d.setDate(d.getDate()+n); return d; }
+function daysUntil(s){ if(!s) return null; const t = new Date(s+"T12:00:00"), n = new Date(); n.setHours(12,0,0,0); return Math.round((t-n)/864e5); }
+const radio = n => (document.querySelector(`input[name="${n}"]:checked`)||{}).value;
+
+/* Armenian originals, read once from the page */
+const HY = {};
+document.querySelectorAll("[data-i18n]").forEach(el=>{ if (!(el.dataset.i18n in HY)) HY[el.dataset.i18n] = el.innerHTML; });
+const tr = k => { const D = DICT[lang]; return (D && D[k]) || HY[k] || k; };
+
+let lang = "hy", step = 1, done = false, currentId = null, view = "";
+const state = { type:"dipl", pages:60, date: iso(addDays(21)), wlang:"hy", pres:false, plag:false };
+let orders = [];
+try {
+  const sl = localStorage.getItem("grich-lang"); if (sl === "ru" || sl === "en") lang = sl;
+  const s = JSON.parse(localStorage.getItem("grich-app-draft") || "null");
+  if (s && TYPES[s.type]) Object.assign(state, { type:s.type, pages:+s.pages||TYPES[s.type].def, date:s.date||state.date,
+    wlang:["hy","ru","en"].includes(s.wlang)?s.wlang:"hy", pres:!!s.pres, plag:!!s.plag });
+  if (s && s.f) Object.entries(s.f).forEach(([id,v])=>{ const el=$(id); if(el) el.value=v; });
+  if (s && s.msgr){ const el=document.querySelector(`input[name="w-msgr"][value="${s.msgr}"]`); if(el) el.checked=true; }
+  const o = JSON.parse(localStorage.getItem("grich-orders") || "[]"); if (Array.isArray(o)) orders = o.filter(x=>x && x.id && TYPES[x.type]);
+} catch(e){}
+
+function saveDraft(){
+  try {
+    const f = {}; ["w-topic","w-uni","w-notes","w-name","w-contact"].forEach(id=>{ f[id] = $(id).value; });
+    localStorage.setItem("grich-app-draft", JSON.stringify({ ...state, f, msgr: radio("w-msgr") }));
+  } catch(e){}
+}
+function storeOrders(){ try { localStorage.setItem("grich-orders", JSON.stringify(orders)); } catch(e){} }
+
+/* ---------- price ---------- */
+function buildTypes(){
+  const t = T[lang];
+  $("q-types").innerHTML = Object.entries(TYPES).map(([k,v])=>`<label><input type="radio" name="q-type" value="${k}" ${k===state.type?"checked":""}><span>${t.names[k]}<em>${A[lang].from} ${money(v.rate*v.min)}</em></span></label>`).join("");
+  $("w-type").innerHTML = Object.keys(TYPES).map(k=>`<option value="${k}" ${k===state.type?"selected":""}>${t.names[k]}</option>`).join("");
+  document.querySelectorAll('input[name="q-type"]').forEach(r=>r.addEventListener("change",()=>setType(r.value)));
+  const rows = Object.entries(TYPES).map(([k,v])=>{
+    const vol = `${v.min}–${v.max} ${v.unit==="s"?t.s:t.p}`;
+    return `<div class="prow"><span class="t">${t.names[k]}<small>${t.desc[k]}</small></span>
+      <span><span class="k">${tr("th_vol")}</span>${vol}</span>
+      <span><span class="k">${tr("th_term")}</span>${v.term} ${t.days}</span>
+      <span><span class="k">${tr("th_from")}</span><span class="from">${money(v.rate*v.min)}</span></span>
+      <span class="act"><button type="button" class="btn btn-ghost btn-sm" data-pick="${k}">${t.pick}</button></span></div>`;
+  }).join("");
+  const head = $("ptable").querySelector(".head").outerHTML;
+  $("ptable").innerHTML = head + rows;
+  $("ptable").querySelectorAll("[data-pick]").forEach(b=>b.addEventListener("click",()=>{
+    setType(b.dataset.pick); $("quote").scrollIntoView({behavior:"smooth",block:"start"});
+  }));
+}
+function setType(k){ if (!TYPES[k]) return; state.type = k; state.pages = TYPES[k].def; render(); }
+function clampPages(v){ const T0 = TYPES[state.type]; v = Math.round(+v||T0.def); return Math.min(T0.max, Math.max(T0.min, v)); }
+
+function calc(){
+  const ty = TYPES[state.type], d = daysUntil(state.date), t = T[lang];
+  const base = ty.rate * state.pages;
+  const mult = d === null ? 1 : urgency(Math.max(d,0));
+  const rows = [[t.base, base]]; let total = base;
+  if (mult > 1){ const u = base*(mult-1); rows.push([t.urg+` (+${Math.round((mult-1)*100)}%)`, u]); total += u; }
+  if (state.wlang !== "hy"){ const l = total*LANG_UP; rows.push([t.lang, l]); total += l; }
+  if (state.pres && state.type !== "pres"){ rows.push([t.pres, EXTRA.pres]); total += EXTRA.pres; }
+  if (state.plag){ rows.push([t.plag, EXTRA.plag]); total += EXTRA.plag; }
+  return { total, rows, d, mult };
+}
+
+/* smooth number roll for the price */
+const calm = matchMedia("(prefers-reduced-motion: reduce)");
+function countTo(el, to){
+  const from = +el.dataset.v || 0; el.dataset.v = to;
+  if (calm.matches || !from || from === to || document.hidden){ el.textContent = money(to); return; }
+  const t0 = performance.now(), dur = 420; cancelAnimationFrame(el._raf);
+  const tick = now => { const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+    el.textContent = money(from + (to - from) * e); if (p < 1) el._raf = requestAnimationFrame(tick); };
+  el._raf = requestAnimationFrame(tick);
+}
+
+function render(){
+  state.pages = clampPages(state.pages);
+  const t = T[lang], ty = TYPES[state.type], c = calc();
+  const unitLbl = ty.unit==="s" ? t.lblS : t.lblP, unit = ty.unit==="s" ? t.s : t.p;
+  const qr = document.querySelector(`input[name="q-type"][value="${state.type}"]`); if (qr) qr.checked = true;
+  $("w-type").value = state.type;
+  [$("q-pages"),$("w-pages")].forEach(el=>{ if (document.activeElement!==el) el.value = state.pages; el.min = ty.min; el.max = ty.max; });
+  $("q-pages-lbl").textContent = unitLbl; $("w-pages-lbl").textContent = unitLbl + ` (${ty.min}–${ty.max})`;
+  [$("q-date"),$("w-date")].forEach(el=>{ el.value = state.date; el.min = iso(addDays(1)); });
+  document.querySelectorAll('input[name="q-lang"],input[name="w-lang"]').forEach(r=>{ r.checked = r.value === state.wlang; });
+  $("x-pres").checked = state.pres; $("x-plag").checked = state.plag;
+  const hint = c.d === null ? "" : c.d < 1 ? t.past : t.left(c.d) + (c.mult>1 ? " · " + t.rush(Math.round((c.mult-1)*100)) : "");
+  [$("q-days"),$("w-days")].forEach(el=>{ el.textContent = hint; el.classList.toggle("warn", c.d !== null && (c.d < 1 || c.mult > 1)); });
+  $("x-pres-wrap").hidden = state.type === "pres";
+  const total = c.total, h1 = round(total/2), h2 = round(total)-h1;
+  const rowsHtml = c.rows.map(r=>`<li><span>${r[0]}</span><span>${money(r[1])}</span></li>`).join("");
+  countTo($("q-sum"), round(total));
+  $("q-split").textContent = A[lang].split(money(h1), money(h2));
+  $("q-rows").innerHTML = rowsHtml;
+  $("sum-type").textContent = `${t.names[state.type]} · ${state.pages} ${unit}`;
+  countTo($("sum-total"), round(total));
+  $("sum-list").innerHTML = rowsHtml;
+  $("sum-half1").textContent = money(h1); $("sum-half2").textContent = money(h2);
+  saveDraft();
+}
+
+document.querySelectorAll(".stepper button").forEach(b=>b.addEventListener("click",()=>{ state.pages = clampPages(state.pages + (+b.dataset.step)); render(); }));
+[$("q-pages"),$("w-pages")].forEach(el=>{
+  el.addEventListener("input",()=>{ if (el.value!=="") { state.pages = +el.value; const keep=state.pages; render(); state.pages = clampPages(keep); } });
+  el.addEventListener("change",()=>{ state.pages = clampPages(el.value); el.value = state.pages; render(); });
+});
+[$("q-date"),$("w-date")].forEach(el=>el.addEventListener("change",()=>{ state.date = el.value; render(); }));
+$("w-type").addEventListener("change",e=>setType(e.target.value));
+$("x-pres").addEventListener("change",e=>{ state.pres = e.target.checked; render(); });
+$("x-plag").addEventListener("change",e=>{ state.plag = e.target.checked; render(); });
+document.querySelectorAll('input[name="q-lang"],input[name="w-lang"]').forEach(r=>r.addEventListener("change",()=>{ state.wlang = r.value; render(); }));
+document.querySelectorAll('input[name="w-msgr"]').forEach(r=>r.addEventListener("change",saveDraft));
+["w-topic","w-uni","w-notes","w-name","w-contact"].forEach(id=>$(id).addEventListener("input",saveDraft));
+
+/* ---------- order wizard ---------- */
+function showStep(n){
+  step = n; done = false;
+  document.querySelectorAll("#wiz fieldset").forEach(f=>f.hidden = +f.dataset.step !== n);
+  $("result").hidden = true; $("w-err").hidden = true;
+  $("w-back").hidden = n === 1;
+  $("w-next").textContent = n === 3 ? T[lang].send : tr("w_next");
+  document.querySelectorAll("#progress li").forEach((li,i)=>li.classList.toggle("on", i < n));
+}
+function validate(n){
+  const t = T[lang];
+  if (n === 1 && !$("w-topic").value.trim()) return [t.errTopic, "w-topic"];
+  if (n === 2){ const d = daysUntil(state.date); if (d === null || d < 1) return [t.errDate, "w-date"]; }
+  if (n === 3 && (!$("w-name").value.trim() || !$("w-contact").value.trim())) return [t.errContact, !$("w-name").value.trim() ? "w-name" : "w-contact"];
+  return null;
+}
+$("wiz").addEventListener("submit",e=>{
+  e.preventDefault();
+  if (done){ currentId = null; $("w-topic").value = ""; $("w-notes").value = ""; saveDraft(); showStep(1); window.scrollTo(0,0); return; }
+  const bad = validate(step);
+  if (bad){ $("w-err").textContent = bad[0]; $("w-err").hidden = false; $(bad[1]).focus(); return; }
+  if (step < 3){ showStep(step+1); return; }
+  buildMessage();
+});
+$("w-back").addEventListener("click",()=>{ if (done) showStep(3); else if (step>1) showStep(step-1); });
+document.querySelectorAll("#progress button").forEach(b=>b.addEventListener("click",()=>{
+  const n = +b.dataset.go; if (n <= step || done) { showStep(n); return; }
+  for (let i=step;i<n;i++){ const bad = validate(i); if (bad){ showStep(i); $("w-err").textContent = bad[0]; $("w-err").hidden = false; return; } }
+  showStep(n);
+}));
+
+function buildMessage(){
+  const t = T[lang], m = t.m, c = calc(), ty = TYPES[state.type];
+  const extras = [ state.pres && state.type!=="pres" ? t.pres : "", state.plag ? t.plag : "" ].filter(Boolean).join(", ");
+  const msgr = radio("w-msgr"), topic = $("w-topic").value.trim();
+  const lines = [m[0], "",
+    `${m[1]}: ${t.names[state.type]}`,
+    `${m[2]}: ${topic}`,
+    `${m[3]}: ${state.pages} ${ty.unit==="s"?t.s:t.p}`,
+    `${m[4]}: ${fmtDate(state.date)}`,
+    `${m[5]}: ${t.langs[state.wlang]}`,
+    $("w-uni").value.trim() ? `${m[6]}: ${$("w-uni").value.trim()}` : null,
+    extras ? `${m[7]}: ${extras}` : null,
+    $("w-notes").value.trim() ? `${m[8]}: ${$("w-notes").value.trim()}` : null,
+    "",
+    `${m[9]}: ${$("w-name").value.trim()}`,
+    `${m[10]}: ${$("w-contact").value.trim()}`,
+    `${m[11]}: ${msgr==="call" ? t.call : msgr}`,
+    `${m[12]}: ${money(c.total)}`
+  ].filter(x => x !== null);
+  const text = lines.join("\n");
+  $("r-text").textContent = text;
+  const enc = encodeURIComponent(text);
+  $("r-wa").hidden = !CONTACT.whatsapp; if (CONTACT.whatsapp) $("r-wa").href = `https://wa.me/${CONTACT.whatsapp}?text=${enc}`;
+  $("r-tg").hidden = !CONTACT.telegram; if (CONTACT.telegram) $("r-tg").href = `https://t.me/${CONTACT.telegram}`;
+  $("r-share").hidden = !navigator.share;
+  $("r-ok").hidden = true;
+  document.querySelectorAll("#wiz fieldset").forEach(f=>f.hidden = true);
+  $("result").hidden = false; $("w-err").hidden = true; done = true;
+  $("w-next").textContent = t.newO; $("w-back").hidden = false;
+  /* save / update in "My orders" */
+  const prev = orders.find(o=>o.id===currentId);
+  const rec = { id: currentId || "o" + Date.now().toString(36), created: prev ? prev.created : Date.now(), status: prev ? prev.status : "ready",
+    type: state.type, pages: state.pages, date: state.date, topic, total: round(c.total), msg: text };
+  if (prev) Object.assign(prev, rec); else orders.unshift(rec);
+  currentId = rec.id; storeOrders(); renderOrders();
+  $("result").scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+
+function copyText(text){
+  const legacy = () => { try { const ta = document.createElement("textarea"); ta.value = text; ta.setAttribute("readonly",""); ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta); ta.select(); const ok = document.execCommand("copy"); ta.remove(); return ok; } catch(e){ return false; } };
+  try { return navigator.clipboard.writeText(text).then(()=>true, ()=>legacy()); } catch(e){ return Promise.resolve(legacy()); }
+}
+function shareText(text){ if (navigator.share) navigator.share({ text }).catch(()=>{}); }
+$("r-copy").addEventListener("click",()=>{
+  copyText($("r-text").textContent).then(ok=>{
+    if (ok) { $("r-ok").hidden = false; return; }
+    const r = document.createRange(); r.selectNodeContents($("r-text")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast(A[lang].copyFail);
+  });
+});
+$("r-share").addEventListener("click",()=>shareText($("r-text").textContent));
+
+/* ---------- my orders ---------- */
+function renderOrders(){
+  const t = T[lang], a = A[lang];
+  const list = [...orders].sort((x,y)=> (x.status==="done") - (y.status==="done") || String(x.date).localeCompare(String(y.date)));
+  $("olist").innerHTML = list.map(o=>{
+    const ty = TYPES[o.type], unit = ty.unit==="s" ? t.s : t.p, d = daysUntil(o.date);
+    let cls = "", due;
+    if (o.status === "done"){ cls = "fin"; due = a.fin; }
+    else if (d === null){ due = ""; }
+    else if (d < 0){ cls = "over"; due = a.over; }
+    else if (d === 0){ cls = "over"; due = a.today; }
+    else { cls = d <= 3 ? "soon" : ""; due = t.left(d); }
+    const end = new Date(o.date+"T12:00:00").getTime();
+    const pct = o.status === "done" ? 100 : Math.max(2, Math.min(100, (Date.now()-o.created) / Math.max(1, end-o.created) * 100));
+    const seg = Object.keys(a.st).map(k=>`<label><input type="radio" name="st-${o.id}" value="${k}" ${o.status===k?"checked":""}><span>${a.st[k]}</span></label>`).join("");
+    const wa = CONTACT.whatsapp ? `<a class="btn btn-ghost btn-sm" target="_blank" rel="noopener" href="https://wa.me/${CONTACT.whatsapp}?text=${encodeURIComponent(o.msg)}">WhatsApp</a>` : "";
+    return `<article class="ocard${o.status==="done"?" is-done":""}">
+      <div class="ohead"><strong>${t.names[o.type]} · ${o.pages} ${unit}</strong>${due?`<span class="due ${cls}">${due}</span>`:""}</div>
+      ${o.topic ? `<p class="otopic">${esc(o.topic)}</p>` : ""}
+      <div class="tl ${cls}" aria-hidden="true"><i style="width:${pct.toFixed(0)}%"></i></div>
+      <div class="ometa"><span>${a.due}: <b>${fmtDate(o.date)}</b></span><span>${money(o.total)}</span><span>${a.made}: ${fmtDate(iso(new Date(o.created)))}</span></div>
+      <div class="stseg" role="radiogroup" aria-label="${a.status}">${seg}</div>
+      <div class="oact">
+        <button type="button" class="btn btn-ghost btn-sm" data-act="copy" data-id="${o.id}">${a.copy}</button>
+        ${navigator.share ? `<button type="button" class="btn btn-ghost btn-sm" data-act="share" data-id="${o.id}">${a.share}</button>` : ""}
+        ${wa}
+        <button type="button" class="btn btn-ghost btn-sm del" data-act="del" data-id="${o.id}">${a.del}</button>
+      </div>
+    </article>`;
+  }).join("");
+  $("oempty").hidden = orders.length > 0;
+  const active = orders.filter(o=>o.status!=="done").length;
+  document.querySelectorAll(".count").forEach(el=>{ el.textContent = active; el.hidden = !active; });
+}
+$("olist").addEventListener("change",e=>{
+  const r = e.target; if (!r.name || !r.name.startsWith("st-")) return;
+  const o = orders.find(x=>x.id===r.name.slice(3)); if (!o) return;
+  o.status = r.value; storeOrders(); renderOrders();
+  const again = document.querySelector(`input[name="st-${o.id}"][value="${o.status}"]`); if (again) again.focus();
+});
+$("olist").addEventListener("click",e=>{
+  const b = e.target.closest("button[data-act]"); if (!b) return;
+  const o = orders.find(x=>x.id===b.dataset.id); if (!o) return;
+  const a = A[lang];
+  if (b.dataset.act === "copy") copyText(o.msg).then(ok=>toast(ok ? tr("r_ok") : a.copyFail));
+  if (b.dataset.act === "share") shareText(o.msg);
+  if (b.dataset.act === "del"){
+    if (b.dataset.armed){ orders = orders.filter(x=>x!==o); if (currentId===o.id) currentId = null; storeOrders(); renderOrders(); toast(a.deleted); return; }
+    b.dataset.armed = "1"; b.textContent = a.delQ; b.classList.add("danger");
+    setTimeout(()=>{ if (b.isConnected){ delete b.dataset.armed; b.textContent = A[lang].del; b.classList.remove("danger"); } }, 4000);
+  }
+});
+
+/* ---------- contacts ---------- */
+function renderContacts(){
+  const t = T[lang], parts = [];
+  if (CONTACT.phone) parts.push(`<span>${t.phone}: <b>${CONTACT.phone}</b></span>`);
+  if (CONTACT.whatsapp) parts.push(`<span>WhatsApp: <a href="https://wa.me/${CONTACT.whatsapp}" target="_blank" rel="noopener">+${CONTACT.whatsapp}</a></span>`);
+  if (CONTACT.telegram) parts.push(`<span>Telegram: <a href="https://t.me/${CONTACT.telegram}" target="_blank" rel="noopener">@${CONTACT.telegram}</a></span>`);
+  const html = parts.length ? parts.join("") : `<span>${t.nocontact}</span>`;
+  $("contacts").innerHTML = html; $("r-contacts").innerHTML = html;
+}
+
+/* ---------- toast ---------- */
+let toastTimer;
+function toast(msg, action){
+  const el = $("toast"); el.textContent = msg;
+  if (action){ const b = document.createElement("button"); b.type = "button"; b.textContent = action.label; b.onclick = action.fn; el.append(b); }
+  el.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(()=>{ el.hidden = true; }, action ? 12000 : 2600);
+}
+addEventListener("offline",()=>toast(A[lang].offline));
+addEventListener("online",()=>toast(A[lang].online));
+
+/* ---------- install (PWA) ---------- */
+let deferredPrompt = null, bannerOff = false;
+try { bannerOff = localStorage.getItem("grich-ib-off") === "1"; } catch(e){}
+const isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+function renderInstall(){
+  const a = A[lang], st = isStandalone();
+  /* inside a preview frame the app can't be installed: hide the install UI */
+  if (window.self !== window.top){ ["install","install-banner","install-card"].forEach(id=>{ $(id).hidden = true; }); return; }
+  $("install").hidden = !deferredPrompt || st;
+  $("install-banner").hidden = st || bannerOff || !(deferredPrompt || isIOS);
+  $("ib-btn").hidden = !deferredPrompt;
+  $("ib-ios").hidden = !!deferredPrompt || !isIOS; $("ib-ios").textContent = a.ios;
+  $("inst-btn").hidden = !deferredPrompt || st;
+  const hint = st ? a.installed : deferredPrompt ? "" : isIOS ? a.ios : a.other;
+  $("inst-hint").textContent = hint; $("inst-hint").hidden = !hint; $("inst-hint").className = st ? "ok" : "hint";
+}
+async function doInstall(){
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  try { await deferredPrompt.userChoice; } catch(e){}
+  deferredPrompt = null; renderInstall();
+}
+addEventListener("beforeinstallprompt",e=>{ e.preventDefault(); deferredPrompt = e; renderInstall(); });
+addEventListener("appinstalled",()=>{ deferredPrompt = null; renderInstall(); toast(A[lang].installed); });
+["install","ib-btn","inst-btn"].forEach(id=>$(id).addEventListener("click",doInstall));
+$("ib-x").addEventListener("click",()=>{ bannerOff = true; try{ localStorage.setItem("grich-ib-off","1"); }catch(e){} renderInstall(); });
+
+/* ---------- views (hash routing) ---------- */
+const VIEWS = ["price","order","my","faq"];
+function route(){
+  const h = location.hash.slice(1), v = VIEWS.includes(h) ? h : "price";
+  const changed = v !== view; view = v;
+  VIEWS.forEach(k=>{ $("v-"+k).hidden = k !== v; });
+  document.querySelectorAll("[data-tab]").forEach(a=>{ if (a.dataset.tab === v) a.setAttribute("aria-current","page"); else a.removeAttribute("aria-current"); });
+  document.title = v === "price" ? "Գրիչ" : `Գրիչ · ${tr("tab_"+v).replace(/<[^>]+>/g,"")}`;
+  if (v === "my") renderOrders();
+  if (changed) window.scrollTo(0,0);
+}
+addEventListener("hashchange",route);
+
+/* ---------- language ---------- */
+function applyLang(){
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-i18n]").forEach(el=>{ el.innerHTML = tr(el.dataset.i18n); });
+  document.querySelectorAll("[data-i18n-ph]").forEach(el=>{
+    if (el.dataset.hyPh === undefined) el.dataset.hyPh = el.placeholder;
+    const k = el.dataset.i18nPh, D = DICT[lang]; el.placeholder = D && D[k] ? D[k] : el.dataset.hyPh;
+  });
+  ["hy","ru","en"].forEach(l=>$("lang-"+l).setAttribute("aria-pressed", lang===l));
+  buildTypes(); renderContacts(); render(); renderOrders(); renderInstall();
+  if (done) buildMessage(); else showStep(step);
+  const v = view; view = ""; route(); view = v;
+}
+function setLang(l){ lang = l; try{ localStorage.setItem("grich-lang", l); }catch(e){} applyLang(); }
+$("lang-hy").onclick = ()=>setLang("hy");
+$("lang-ru").onclick = ()=>setLang("ru");
+$("lang-en").onclick = ()=>setLang("en");
+
+applyLang();
+route();
+
+/* ---------- offline: service worker (only on a real site, not inside a preview frame) ---------- */
+if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol) && window.self === window.top){
+  addEventListener("load",()=>{
+    navigator.serviceWorker.register("sw.js").then(reg=>{
+      reg.addEventListener("updatefound",()=>{
+        const w = reg.installing; if (!w) return;
+        w.addEventListener("statechange",()=>{
+          if (w.state === "activated" && navigator.serviceWorker.controller && hadController)
+            toast(A[lang].update, { label: A[lang].reload, fn: ()=>location.reload() });
+        });
+      });
+    }).catch(()=>{});
+  });
+}
+const hadController = !!(navigator.serviceWorker && navigator.serviceWorker.controller);
+</script>
