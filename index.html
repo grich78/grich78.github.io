@@ -690,7 +690,8 @@ legend{font-weight:800;font-size:1.3rem;margin-bottom:16px;font-stretch:87.5%;pa
 const CONTACT = {
   phone: "+374 94 449229",      // օր.՝ "+374 99 123456" (Viber-ի և զանգի համար)
   whatsapp: "37494449229",   // միայն թվեր, օր.՝ "37499123456"
-  telegram: "+37494449229"    // առանց @ (կամ հեռախոսահամար՝ +-ով), օր.՝ "grich_am"
+  telegram: "+37494449229",   // առանց @ (կամ հեռախոսահամար՝ +-ով), օր.՝ "grich_am"
+  viber: "+37494449229"       // Viber-ի համար
 };
 /* ===== Գներ ===== rate՝ ֏ մեկ էջի (պրեզենտացիայի դեպքում՝ մեկ սլայդի) համար */
 const TYPES = {
@@ -1160,6 +1161,7 @@ function renderContacts(){
   if (CONTACT.phone) parts.push(`<span>${t.phone}: <b>${CONTACT.phone}</b></span>`);
   if (CONTACT.whatsapp) parts.push(`<span>WhatsApp: <a href="https://wa.me/${CONTACT.whatsapp}" target="_blank" rel="noopener">+${CONTACT.whatsapp}</a></span>`);
   if (CONTACT.telegram) parts.push(`<span>Telegram: <a href="https://t.me/${CONTACT.telegram}" target="_blank" rel="noopener">${CONTACT.telegram.startsWith("+") ? CONTACT.telegram : "@" + CONTACT.telegram}</a></span>`);
+  if (CONTACT.viber) parts.push(`<span>Viber: <a href="viber://chat?number=${encodeURIComponent(CONTACT.viber)}">${CONTACT.viber}</a></span>`);
   const html = parts.length ? parts.join("") : `<span>${t.nocontact}</span>`;
   $("contacts").innerHTML = html; $("r-contacts").innerHTML = html;
 }
