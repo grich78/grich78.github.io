@@ -1,6 +1,6 @@
 /* Գրիչ — service worker: app shell offline + cached fonts.
    Change VERSION after editing any app file, so phones get the update. */
-const VERSION = "grich-app-v1";
+const VERSION = "grich-app-v2";
 const FONTS = "grich-fonts-v1";
 const SHELL = [
   "./", "./index.html", "./manifest.webmanifest",

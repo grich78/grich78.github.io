@@ -688,9 +688,9 @@ legend{font-weight:800;font-size:1.3rem;margin-bottom:16px;font-stretch:87.5%;pa
 <script>
 /* ===== Կոնտակտներ — լրացրեք այստեղ (նույնը, ինչ կայքում) ===== */
 const CONTACT = {
-  phone: "",      // օր.՝ "+374 99 123456" (Viber-ի և զանգի համար)
-  whatsapp: "",   // միայն թվեր, օր.՝ "37499123456"
-  telegram: ""    // առանց @, օր.՝ "grich_am"
+  phone: "+374 94 449229",      // օր.՝ "+374 99 123456" (Viber-ի և զանգի համար)
+  whatsapp: "37494449229",   // միայն թվեր, օր.՝ "37499123456"
+  telegram: "+37494449229"    // առանց @ (կամ հեռախոսահամար՝ +-ով), օր.՝ "grich_am"
 };
 /* ===== Գներ ===== rate՝ ֏ մեկ էջի (պրեզենտացիայի դեպքում՝ մեկ սլայդի) համար */
 const TYPES = {
@@ -848,7 +848,7 @@ const T = {
        left:n=>`${n} days left`, past:"Pick a later date", rush:n=>`urgent: +${n}%`,
        base:"Base price", urg:"Urgency", lang:"Language (+15%)", pres:"Presentation", plag:"Originality check",
        errTopic:"Write the topic or field.", errDate:"Pick a due date after today.", errContact:"Write your name and phone or @username.",
-       send:"Prepare request", newO:"New request", nocontact:"Contacts coming soon", phone:"Phone / Viber",
+       send:"Prepare request", newO:"New request", nocontact:"Contacts coming soon", phone:"Phone",
        langs:{hy:"Armenian",ru:"Russian",en:"English"}, call:"Call",
        m:["Hello, I’d like to order a paper.","Type","Topic","Length","Due date","Language","University","Extras","Requirements","Name","Contact","Reach me via","Estimated price (from the site)"] },
   hy:{ names:{ref:"Ռեֆերատ",kurs:"Կուրսային",dipl:"Դիպլոմային",mag:"Մագիստրոսական թեզ",pres:"Պրեզենտացիա",form:"Ձևավորում"},
@@ -857,7 +857,7 @@ const T = {
        left:n=>`մնաց ${n} օր`, past:"Ընտրիր ավելի ուշ ամսաթիվ", rush:n=>`շտապ՝ +${n}%`,
        base:"Հիմնական", urg:"Շտապություն", lang:"Լեզու (+15%)", pres:"Պրեզենտացիա", plag:"Եզակիության ստուգում",
        errTopic:"Գրիր թեման կամ ուղղությունը։", errDate:"Ընտրիր հանձնման օրը (այսօրվանից հետո)։", errContact:"Գրիր անունդ և հեռախոսը կամ @username-ը։",
-       send:"Պատրաստել հայտը", newO:"Նոր հայտ", nocontact:"Կոնտակտները շուտով կավելացվեն", phone:"Հեռախոս / Viber",
+       send:"Պատրաստել հայտը", newO:"Նոր հայտ", nocontact:"Կոնտակտները շուտով կավելացվեն", phone:"Հեռախոս",
        langs:{hy:"Հայերեն",ru:"Ռուսերեն",en:"Անգլերեն"}, call:"Զանգ",
        m:["Բարև, ուզում եմ պատվիրել աշխատանք։","Տեսակ","Թեմա","Ծավալ","Ժամկետ","Լեզու","Բուհ","Լրացուցիչ","Պահանջներ","Անուն","Կոնտակտ","Կապ","Նախնական գին (կայքից)"] },
   ru:{ names:{ref:"Реферат",kurs:"Курсовая",dipl:"Дипломная",mag:"Магистерская",pres:"Презентация",form:"Оформление"},
@@ -866,7 +866,7 @@ const T = {
        left:n=>`осталось ${n} дн.`, past:"Выбери более позднюю дату", rush:n=>`срочно: +${n}%`,
        base:"Основная стоимость", urg:"Срочность", lang:"Язык (+15%)", pres:"Презентация", plag:"Проверка уникальности",
        errTopic:"Напиши тему или направление.", errDate:"Выбери день сдачи (позже сегодняшнего).", errContact:"Напиши имя и телефон или @username.",
-       send:"Подготовить заявку", newO:"Новая заявка", nocontact:"Контакты скоро появятся", phone:"Телефон / Viber",
+       send:"Подготовить заявку", newO:"Новая заявка", nocontact:"Контакты скоро появятся", phone:"Телефон",
        langs:{hy:"Армянский",ru:"Русский",en:"Английский"}, call:"Звонок",
        m:["Здравствуйте, хочу заказать работу.","Тип","Тема","Объём","Срок","Язык","Вуз","Дополнительно","Требования","Имя","Контакт","Связь","Предварительная цена (с сайта)"] }
 };
@@ -1159,7 +1159,7 @@ function renderContacts(){
   const t = T[lang], parts = [];
   if (CONTACT.phone) parts.push(`<span>${t.phone}: <b>${CONTACT.phone}</b></span>`);
   if (CONTACT.whatsapp) parts.push(`<span>WhatsApp: <a href="https://wa.me/${CONTACT.whatsapp}" target="_blank" rel="noopener">+${CONTACT.whatsapp}</a></span>`);
-  if (CONTACT.telegram) parts.push(`<span>Telegram: <a href="https://t.me/${CONTACT.telegram}" target="_blank" rel="noopener">@${CONTACT.telegram}</a></span>`);
+  if (CONTACT.telegram) parts.push(`<span>Telegram: <a href="https://t.me/${CONTACT.telegram}" target="_blank" rel="noopener">${CONTACT.telegram.startsWith("+") ? CONTACT.telegram : "@" + CONTACT.telegram}</a></span>`);
   const html = parts.length ? parts.join("") : `<span>${t.nocontact}</span>`;
   $("contacts").innerHTML = html; $("r-contacts").innerHTML = html;
 }
